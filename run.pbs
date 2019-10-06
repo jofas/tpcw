@@ -1,9 +1,9 @@
 #!/bin/bash --login
 
 # PBS job options (name, compute nodes, job time)
-#PBS -N loops
+#PBS -N tp_out
 #PBS -l select=72
-#PBS -l walltime=01:00:00
+#PBS -l walltime=08:00:00
 #PBS -A d171-s2000901
 #PBS -l place=excl
 #PBS -j oe
@@ -16,7 +16,7 @@ export OMP_NUM_THREADS=4
 
 for prog in main*; do
   echo $prog
-  for i in 1 .. 100; do
+  for i in $(seq 1 100); do
     echo Iteration: $i
     ./$prog
   done
