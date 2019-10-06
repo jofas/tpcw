@@ -93,11 +93,13 @@ subroutine loop1()
 
   integer ::  i,j
 
+  !$omp parallel do default(none) private(j) shared(a, b)
   do i = 1,N
      do j = N,i,-1
         a(j,i) = a(j,i) + cos(b(j,i))
      end do
   end do
+  !$omp end parallel do
 
 end subroutine loop1
 
@@ -112,6 +114,8 @@ subroutine loop2()
 
   rN2 = 1.0 / dble (N*N)
 
+  !$omp parallel do default(none) private(j, k) &
+  !$omp             shared(c, b, jmax, rN2)
   do i = 1,N
      do j = 1, jmax(i)
         do k = 1,j
@@ -119,6 +123,7 @@ subroutine loop2()
         end do
      end do
   end do
+  !$omp end parallel do
 
 end subroutine loop2
 
