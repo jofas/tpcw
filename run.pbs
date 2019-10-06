@@ -1,0 +1,23 @@
+#!/bin/bash --login
+
+# PBS job options (name, compute nodes, job time)
+#PBS -N loops
+#PBS -l select=72
+#PBS -l walltime=01:00:00
+#PBS -A d171-s2000901
+#PBS -l place=excl
+#PBS -j oe
+
+# Change to the directory that the job was submitted from
+# (remember this should be on the /work filesystem)
+cd $PBS_O_WORKDIR
+
+export OMP_NUM_THREADS=4
+
+for prog in main*; do
+  echo $prog
+  for i in 1 .. 100; do
+    echo Iteration: $i
+    ./$prog
+  done
+done
