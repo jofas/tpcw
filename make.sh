@@ -22,6 +22,8 @@ function compile {
   fi
 }
 
+$FC loops_seq.f90 -o main_seq $FFLAGS
+
 compile static
 compile auto
 
