@@ -6,7 +6,7 @@ import numpy as np
 
 from statistics import median, mean
 
-MATCH = re.compile(r"(^Loop: (?P<loop>[0-9])|^Threads: (?P<threads>[0-9]+)|^.*(?P<loop>[12]) = +(?P<time>[0-9]+.[0-9]+))")
+MATCH = re.compile(r"(^Loop: (?P<loop>[12])|^Threads: (?P<threads>[0-9]+)|^.*(?P=loop) = +(?P<time>[0-9]+.[0-9]+))")
 
 def parse():
 
