@@ -6,7 +6,7 @@ import numpy as np
 
 from statistics import median, mean
 
-MATCH = re.compile(r"(^Threads: (?P<threads>[0-9]+)|^.*(?P<loop>[12]) = +(?P<time>[0-9]+.[0-9]+))")
+MATCH = re.compile(r"(^Loop: (?P<loop>[0-9])|^Threads: (?P<threads>[0-9]+)|^.*(?P<loop>[12]) = +(?P<time>[0-9]+.[0-9]+))")
 
 def parse():
 
@@ -27,13 +27,16 @@ def parse():
 
     data = []
     cur_threads = None
+    cur_loop = None
 
     with open("data/raw_fastest.txt", "r") as f:
         for line in f:
             s = re.match(MATCH, line)
 
             if s != None:
-                if s.group('threads') != None:
+                if s.group("loop") != None:
+                    cur_loop = int(s.group("loop"))
+                elif s.group('threads') != None:
                     cur_threads = s.group('threads')
                 else:
                     loop = int(s.group("loop"))

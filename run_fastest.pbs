@@ -3,7 +3,7 @@
 # PBS job options (name, compute nodes, job time)
 #PBS -N tp_out
 #PBS -l select=16
-#PBS -l walltime=01:00:00
+#PBS -l walltime=03:00:00
 #PBS -A d171-s2000901
 #PBS -l place=excl
 #PBS -j oe
