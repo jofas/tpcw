@@ -12,13 +12,21 @@
 # (remember this should be on the /work filesystem)
 cd $PBS_O_WORKDIR
 
-for num_threads in 1 2 4 6 8 12 16; do
-  export OMP_NUM_THREADS=$num_threads
+function run {
+  for num_threads in 1 2 4 6 8 12 16; do
+    export OMP_NUM_THREADS=$num_threads
 
-  echo Threads: $num_threads
+    echo Threads: $num_threads
 
-  for i in $(seq 1 100); do
-    echo Iteration: $i
-    ./main_dynamic_16
+    for i in $(seq 1 100); do
+      echo Iteration: $i
+      ./$1
+    done
   done
-done
+}
+
+echo Loop: 1
+run main_dynamic_16
+
+echo Loop: 2
+run main_dynamic_8

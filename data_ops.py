@@ -49,6 +49,7 @@ def parse():
     con.commit()
     con.close()
 
+
 def extract_mean_and_median():
     con = sqlite3.connect("data/clean.db")
 
@@ -89,9 +90,48 @@ def fastest():
     print(min_l2, progs[min_l2])
 
 
+def export_tables():
+    Xl1, Xl2, progs = extract_mean_and_median()
+
+    extract = re.compile(
+        r"^main_(?P<type>[a-z]+)(_(?P<num>[0-9]+)){0,1}"
+    )
+
+    fst_col = []
+    for prog in progs:
+        s = re.match(extract, prog)
+
+        type = s.group("type")
+        type = type[0].upper() + type[1:]
+        if type == "Seq": type = "Sequential"
+
+        if s.group("num") != None:
+            fst_col.append(type + ", " + s.group("num"))
+        else:
+            fst_col.append(type)
+
+    header = """\\begin{tabu}{l|ll|ll}
+        schedule &loop 1 &&loop 2 \\\\
+        \\hline
+        &mean &median &mean &median \\\\\
+        \\hline\n"""
+
+    res = [header]
+    for f, row1, row2 in zip(fst_col, Xl1, Xl2):
+        res.append(f + "&{:.2f} &{:.2f} ".format(*row1) \
+            + "&{:.2f} &{:.2f}\\\\\n".format(*row2))
+
+    res += ["\end{tabu}"]
+    res = "".join(res)
+
+    with open("doc/meta_loop.tex", "w") as f:
+        f.write(res)
+
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        if sys.argv[1] == "parse":
-            parse()
-        elif sys.argv[1] == "fastest":
-            fastest()
+    if sys.argv[1] == "parse":
+        parse()
+    elif sys.argv[1] == "fastest":
+        fastest()
+    elif sys.argv[1] == "export":
+        if sys.argv[2] == "tables":
+            export_tables()

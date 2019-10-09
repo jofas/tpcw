@@ -1,0 +1,73 @@
+\documentclass[twoside,11pt]{article}
+\usepackage{jmlr2e}
+\usepackage{amsmath}
+\usepackage[toc,page]{appendix}
+\usepackage[table]{xcolor}
+\usepackage[marginparsep=30pt]{geometry}
+\usepackage{stmaryrd}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{tikz}
+\usepackage{tabu}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{listings}
+\usepackage{fancyref}
+\usepackage{relsize}
+\usepackage{float}
+\usepackage{luacode}
+
+\usetikzlibrary{%
+    arrows,
+    arrows.meta,
+    decorations,
+    backgrounds,
+    positioning,
+    fit,
+    petri,
+    shadows,
+    datavisualization.formats.functions,
+    calc,
+    shapes,
+    shapes.multipart,
+    matrix
+}
+
+\title{Some title}
+
+\author{\name Jonas Fassbender
+        \email jonas@fassbender.dev}
+
+\editor{}
+
+\ShortHeadings{Stuff}{Fassbender}
+\firstpageno{1}
+
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+\end{abstract}
+
+\begin{keywords}
+\end{keywords}
+
+\section{Introduction}
+
+\begin{center}
+\input{fastest_meta_loop1}
+
+\input{fastest_meta_loop2}
+
+\input{meta_loop_perm}
+\end{center}
+
+\section{Experiments}
+
+\section{Results}
+
+\section{Conclusion}
+
+\end{document}
