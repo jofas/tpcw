@@ -40,8 +40,9 @@ def parse():
                     cur_threads = s.group('threads')
                 else:
                     loop = int(s.group("loop"))
-                    time = float(s.group("time"))
-                    data.append([cur_threads, loop, time])
+                    if loop == cur_loop:
+                        time = float(s.group("time"))
+                        data.append([cur_threads, loop, time])
 
     for row in data:
         con.execute("""
