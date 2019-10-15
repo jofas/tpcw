@@ -1,4 +1,5 @@
 \documentclass[twoside,11pt]{article}
+\PassOptionsToPackage{hyphens}{url}
 \usepackage{jmlr2e}
 \usepackage{amsmath}
 \usepackage[toc,page]{appendix}
@@ -15,7 +16,6 @@
 \usepackage{fancyref}
 \usepackage{relsize}
 \usepackage{float}
-\usepackage{luacode}
 
 \usetikzlibrary{%
     arrows,
@@ -33,12 +33,15 @@
     matrix
 }
 
-\title{Some title}
+\def\titl{Threaded Programming coursework: benchmarking
+  OpenMP schedules}
+
+\title{\titl}
 
 \author{\name Jonas Fassbender
         \email jonas@fassbender.dev}
 
-\ShortHeadings{Stuff}{Fassbender}
+\ShortHeadings{\titl}{Jonas Fassbender}
 \firstpageno{1}
 
 
@@ -52,9 +55,126 @@
 \begin{keywords}
 \end{keywords}
 
-\section{Introduction}
+\section{Introduction} % {{{
 
-\section{Experiment}
+This paper documents the results of a benchmark performed
+on a scientific program.
+The program is written in the Fortran programming language
+and performs element-wise computations on matrices (using
+nested do-loops, not array operations).
+It contains two of these matrix operations---in this
+paper called critical sections.
+
+Both critical sections are suitable for speeding up with
+OpenMP's loop construct, distributing the computation on
+multiple threads of execution.
+The loop construct provides the \texttt{schedule} clause,
+which determines the divide of the iterations of the loop
+among the OpenMP threads
+\citep[see][Chapter 2.7.1]{openmp}.
+
+The benchmark consists of two phases.
+The goal of the first phase is to compare different
+scheduling options of the OpenMP library and how they
+effect the execution speed of the two critical
+sections of the program.
+The second phase provides data on how well the fastest
+scheduling options for both critical sections scale with
+different amounts of threads.
+
+OpenMP version 4.5 was used and the benchmark was performed
+on the backend of the Cirrus supercomputer
+\citep[see][]{openmp, cirrus}.
+The program was compiled with the Intel Fortran Compiler
+(\texttt{ifort}) version 17.0.2 \citep[see][]{ifort}.
+
+First, this paper describes the conducted benchmark,
+before presenting the results. At last the results are
+discussed and a conclusion is drawn.
+
+% }}}
+
+\section{Experiment} % {{{
+
+This chapter will describe the performed benchmark.
+First the two critical sections are described, followed by
+a description of the benchmark.
+
+Let $A: n \times n$ and $B: n \times n$ be two matrices,
+$A, B \in \mathbb{R}^n \times \mathbb{R}^n$.
+Let $A(i, j)$ be the element of $A$ in the $i$th row and
+the $j$th column.
+Every element in $A$ is initialized to 0 and every element
+in $B$ is set according to:
+$B(i, j) = \pi(i+j); i,j=1,\dots,n$.
+
+The first critical section updates $A$:
+\begin{align}
+  \label{eq:cs1}
+  A(i, j) = A(i, j) + \cos(B(i, j)); i,j=1,\dots,n.
+\end{align}
+
+Both critical sections are executed multiple times, which
+is the reason $A(i, j)$ on the right-hand side of
+(\ref{eq:cs1}) can not be substituted to 0.
+
+\def\jmax{\vec{j}_{\text{max} }}
+
+For the second critical section,
+let $x = n^{-2}$ and $\vec{c}$ be the zero vector of size
+$n$.
+Let $\jmax \in \mathbb{R}^n$ be another $n$-sized vector.
+$\jmax$ is set to:
+\begin{align*}
+  i=1,\dots,n: \jmax(i) =
+  \begin{cases}
+    n &\text{if } i \text{ mod }
+       \lfloor \frac{i}{10} \rfloor + 1 = 0 \\
+    1 &\text{if } i \text{ mod }
+       \lfloor \frac{i}{10} \rfloor + 1 \neq 0
+  \end{cases}.
+\end{align*}
+The matrix $B'$ is set to $B'(i, j) = (ij + 1)n^{-2};
+i,j = 1,\dots,n$.
+
+The second critical section updates $\vec{c}$:
+\begin{align}
+  \label{eq:cs2}
+  \vec{c}(i) = \sum_{j=1}^{\jmax(i)}\sum_{k=1}^{j}
+    \vec{c}(i) + kx\ln(B'(j, i)), i=1,\dots,n.
+\end{align}
+
+Since both (\ref{eq:cs1}) and (\ref{eq:cs2}) are
+element-wise independent, the computation of every element
+can be distributed over multiple processes.
+
+The benchmark consists of two phases.
+In the first phase, different scheduling options are
+compared using four threads and the fastest scheduling
+option for each critical section is determined.
+The second part of the benchmark tests how well the
+fastest scheduling options scale with different amounts of
+threads.
+For the benchmark $n$ was set to 729.
+
+The different scheduling options used in the first phase
+are:
+\begin{itemize}
+  \item Auto
+  \item Static
+  \item Static, Dynamic, Guided, all with different
+    chunk sizes of: 1, 2, 4, 8, 16, 32, 64
+\end{itemize}
+
+The fastest scheduling options for the critical sections
+are then run with 1, 2, 4, 6, 8, 12 and 16 threads during
+the second phase of the benchmark.
+
+Like stated in the introduction, both benchmark phases are
+executed on the Cirrus backend with exclusive access to one
+node.
+
+% }}}
 
 \section{Results}
 
@@ -224,5 +344,7 @@
 % }}}
 
 \section{Conclusion}
+
+\bibliography{tpcw.bib}
 
 \end{document}
