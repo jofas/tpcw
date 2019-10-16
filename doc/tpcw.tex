@@ -101,13 +101,14 @@ discussed and a conclusion is drawn.
 \section{Experiment} % {{{
 
 This chapter will describe the performed benchmark.
-First the two critical sections are described, followed by
-a description of the benchmark.
+First the two critical sections are described
+mathematically, followed by a description of the benchmark.
 
+Let $n \in \mathbb{N}$ be a positive integer.
 Let $A: n \times n$ and $B: n \times n$ be two matrices,
 $A, B \in \mathbb{R}^n \times \mathbb{R}^n$.
-Let $A(i, j)$ be the element of $A$ in the $i$th row and
-the $j$th column.
+Let $A(i, j); 1 \leq i, j \leq n$ be the element of $A$ in
+the $i$th row and the $j$th column.
 Every element in $A$ is initialized to 0 and every element
 in $B$ is set according to:
 $B(i, j) = \pi(i+j); i,j=1,\dots,n$.
@@ -125,19 +126,19 @@ is the reason $A(i, j)$ on the right-hand side of
 \def\jmax{\vec{j}_{\text{max} }}
 
 For the second critical section,
-let $x = n^{-2}$ and $\vec{c}$ be the zero vector of size
-$n$.
-Let $\jmax \in \mathbb{R}^n$ be another $n$-sized vector.
+let $\vec{c}$ be the zero vector of size $n$.
+Let $\jmax \in \mathbb{N}^n$ be another $n$-sized vector.
 $\jmax$ is set to:
-\begin{align*}
+\begin{align}
+  \label{eq:jmax}
   i=1,\dots,n: \jmax(i) =
   \begin{cases}
     n &\text{if } i \text{ mod }
-       \lfloor \frac{i}{10} \rfloor + 1 = 0 \\
+       3\lfloor \frac{i}{30} \rfloor + 1 = 0 \\
     1 &\text{if } i \text{ mod }
-       \lfloor \frac{i}{10} \rfloor + 1 \neq 0
+       3\lfloor \frac{i}{30} \rfloor + 1 \neq 0
   \end{cases}.
-\end{align*}
+\end{align}
 The matrix $B'$ is set to $B'(i, j) = (ij + 1)n^{-2};
 i,j = 1,\dots,n$.
 
@@ -145,12 +146,32 @@ The second critical section updates $\vec{c}$:
 \begin{align}
   \label{eq:cs2}
   \vec{c}(i) = \sum_{j=1}^{\jmax(i)}\sum_{k=1}^{j}
-    \vec{c}(i) + kx\ln(B'(j, i)), i=1,\dots,n.
+    \vec{c}(i) + k\ln(B'(j, i))n^{-2}, i=1,\dots,n.
 \end{align}
 
 Since both (\ref{eq:cs1}) and (\ref{eq:cs2}) are
 element-wise independent, the computation of every element
 can be distributed over multiple processes.
+
+It should be noted here, that (\ref{eq:cs1}) is a perfect
+computational cube of $n \times n$.
+That means, that every iteration---each a manipulation
+of a single cell $A(i, j)$---contains the same amount of
+instructions, making it trivial to split the iterations
+and having a balanced distribution of work per thread.
+
+On the other hand one can see that (\ref{eq:cs2}) does not
+behave in the same way.
+Each iteration is dependent on $\jmax(i)$, which is not
+constant.
+Instead, $\jmax(i)$ equals either 1 or $n$ and the
+distribution of $\jmax(i) = n$ is asymmetric, since
+the modulus in (\ref{eq:jmax}) changes depending on the
+iteration $i$.
+The consequence is, that for small $i$, $\jmax(i) = n$
+more often, which means that the first iterations are
+computationally more heavy and time consuming than
+the later iterations.
 
 The benchmark consists of two phases.
 In the first phase, different scheduling options are
@@ -189,6 +210,29 @@ execution speed.
 
 \section{Results}
 
+Table~\ref{tab:p1} lists the average and median
+walltime in seconds for the execution of the critical
+sections, determined in phase one of the benchmark.
+% describe phase one results
+
+% critical section 1: all schedules just minor differences
+
+% critical section 2: under 3s: just dyn, 1-16, stat, 2-8
+
+% static 2-8 majorly outperform static
+
+% chunk size has big influence (see static, dyn)
+% -> except guided
+
+
+% describe phase two results
+
+% critical section 1 scales linearly, section 2 stops at
+% 6 threads
+
+% discussion: answer questions raised in results
+
+% why is dyn fastest ?
 
 \begin{table}
 \begin{center}
@@ -197,6 +241,7 @@ execution speed.
   are average and median walltime in seconds for every
   scheduling option for both critical sections. The fastest
   scheduling options are marked with bold font-weight.}
+\label{tab:p1}
 \end{center}
 \end{table}
 
@@ -407,6 +452,8 @@ execution speed.
   amount of threads. The plots show how much faster more
   threads are, compared to just one thread.}
 \end{figure}
+
+\section{Discussion}
 
 \section{Conclusion}
 
