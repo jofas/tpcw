@@ -16,6 +16,7 @@
 \usepackage{fancyref}
 \usepackage{relsize}
 \usepackage{float}
+\usepackage{subcaption}
 
 \usetikzlibrary{%
     arrows,
@@ -33,7 +34,7 @@
     matrix
 }
 
-\def\titl{Threaded Programming coursework: benchmarking
+\def\titl{Threaded Programming coursework I: benchmarking
   OpenMP schedules}
 
 \title{\titl}
@@ -60,24 +61,25 @@
 This paper documents the results of a benchmark performed
 on a scientific program.
 The program is written in the Fortran programming language
-and performs element-wise computations on matrices (using
-nested do-loops, not array operations).
-It contains two of these matrix operations---in this
+and performs element-wise computations on matrices and
+vectors (using nested do-loops, not Fortran's array
+operations).
+It contains two of these matrix/vector operations---in this
 paper called critical sections.
 
 Both critical sections are suitable for speeding up with
 OpenMP's loop construct, distributing the computation on
 multiple threads of execution.
 The loop construct provides the \texttt{schedule} clause,
-which determines the divide of the iterations of the loop
+which determines the division of the loop-iterations
 among the OpenMP threads
 \citep[see][Chapter 2.7.1]{openmp}.
 
 The benchmark consists of two phases.
 The goal of the first phase is to compare different
 scheduling options of the OpenMP library and how they
-effect the execution speed of the two critical
-sections of the program.
+effect the execution speed (measured in seconds) of the two
+critical sections of the program.
 The second phase provides data on how well the fastest
 scheduling options for both critical sections scale with
 different amounts of threads.
@@ -86,7 +88,9 @@ OpenMP version 4.5 was used and the benchmark was performed
 on the backend of the Cirrus supercomputer
 \citep[see][]{openmp, cirrus}.
 The program was compiled with the Intel Fortran Compiler
-(\texttt{ifort}) version 17.0.2 \citep[see][]{ifort}.
+(\texttt{ifort}) version 17.0.2, with the maximum
+optimization provided (optimization level \texttt{O3})
+\citep[see][]{ifort}.
 
 First, this paper describes the conducted benchmark,
 before presenting the results. At last the results are
@@ -173,25 +177,50 @@ the second phase of the benchmark.
 Like stated in the introduction, both benchmark phases are
 executed on the Cirrus backend with exclusive access to one
 node.
+Every scheduling option in phase one and every amount of
+threads in phase two were executed 100 times and the
+average and median walltime---in seconds---were measured
+with the timing routine \texttt{omp\_get\_wtime}, provided
+by OpenMP \citep[see][Chapter 3.4.1]{openmp}.
+The average walltime was used as the decisive criteria for
+execution speed.
 
 % }}}
 
 \section{Results}
 
 
+\begin{table}
 \begin{center}
 \input{meta_loop_perm}
-
-\input{fastest_meta_loop_perm}
+\caption{Results of phase one of the benchmark. Displayed
+  are average and median walltime in seconds for every
+  scheduling option for both critical sections. The fastest
+  scheduling options are marked with bold font-weight.}
 \end{center}
+\end{table}
 
-% chunk size -> time {{{
+\begin{table}
 \begin{center}
+\input{fastest_meta_loop_perm}
+\caption{Results of phase two of the benchmark. Displayed
+  are average and median walltime in seconds for the
+  fastest scheduling options from phase one, for each
+  critical section, executed with different amounts of
+  threads.}
+\end{center}
+\end{table}
+
+\begin{figure}
+\begin{subfigure}{\textwidth}
+\begin{center}
+% critical section 1 {{{
 \begin{tikzpicture}[scale=1.5]
   \datavisualization[
     scientific axes=clean,
     visualize as line/.list={dynamic,guided, static},
     style sheet=vary dashing,
+    style sheet=cross marks,
     dynamic={label in legend={text=dynamic}},
     guided={label in legend={text=guided}},
     static={label in legend={text=static}},
@@ -199,6 +228,7 @@ node.
       logarithmic,
       ticks={major={at={1,2,4,8,16,32,64} } },
       label={chunk size (\textit{log} scale)},
+      grid={minor={at={2,4,8,16,32} }},
     },
     y axis={
       include value={0.45, 0.65},
@@ -236,12 +266,20 @@ node.
     64, 0.62
   };
 \end{tikzpicture}
-
+% }}}
+\caption{Critical section 1.}
+\end{center}
+\vspace{0.5cm}
+\end{subfigure}
+\begin{subfigure}{\textwidth}
+\begin{center}
+% critical section 2 {{{
 \begin{tikzpicture}[scale=1.5]
   \datavisualization[
     scientific axes=clean,
     visualize as line/.list={dynamic,guided, static},
     style sheet=vary dashing,
+    style sheet=cross marks,
     dynamic={label in legend={text=dynamic}},
     guided={label in legend={text=guided}},
     static={label in legend={text=static}},
@@ -249,6 +287,7 @@ node.
       logarithmic,
       ticks={major={at={1,2,4,8,16,32,64 } } },
       label={chunk size (\textit{log} scale)},
+      grid={minor={at={2,4,8,16,32} }},
     },
     y axis={
       include value={2, 5.5},
@@ -286,11 +325,20 @@ node.
     64, 5.37
   };
 \end{tikzpicture}
-\end{center}
 % }}}
+\caption{Critical section 2.}
+\end{center}
+\vspace{0.5cm}
+\end{subfigure}
+\caption{Plots on how the chunk size clause changes the
+  execution speed of the dynamic, guided and static
+  scheduling options, for both critical sections.}
+\end{figure}
 
-% #threads -> speedup {{{
+\begin{figure}
+\begin{subfigure}{\textwidth}
 \begin{center}
+% critical section 1 {{{
 \begin{tikzpicture}[scale=1.5]
   \datavisualization[
     scientific axes=clean,
@@ -298,6 +346,7 @@ node.
     x axis={
       ticks={major={at={1,4,8,12,16}} },
       label={\#threads},
+      grid={minor={at={4,8,12} }},
     },
     y axis={
       ticks={major={at={1,3,6,9,12}} },
@@ -315,7 +364,15 @@ node.
     16, 12.47
   };
 \end{tikzpicture}
+% }}}
+\caption{Critical section 1.}
+\end{center}
+\vspace{0.5cm}
+\end{subfigure}
 
+\begin{subfigure}{\textwidth}
+\begin{center}
+% critical section 2 {{{
 \begin{tikzpicture}[scale=1.5]
   \datavisualization[
     scientific axes=clean,
@@ -323,6 +380,7 @@ node.
     x axis={
       ticks={major={at={1,4,8,12,16}} },
       label={\#threads},
+      grid={minor={at={4,8,12} }},
     },
     y axis={
       include value={1,4.5},
@@ -340,8 +398,15 @@ node.
     16, 4.15
   };
 \end{tikzpicture}
-\end{center}
 % }}}
+\caption{Critical section 2.}
+\end{center}
+\vspace{0.5cm}
+\end{subfigure}
+\caption{Plots on how the execution speed varies with the
+  amount of threads. The plots show how much faster more
+  threads are, compared to just one thread.}
+\end{figure}
 
 \section{Conclusion}
 
