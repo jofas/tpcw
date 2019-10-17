@@ -404,7 +404,25 @@ The fluctuation of the average execution time, based
 on different chunk sizes can be seen in
 Figure~\ref{fig:chunk_size}.
 
-TODO: phase two results.
+During the second phase of the benchmark the two scheduling
+options resulting in the fastest average execution time
+were tested with different amounts of threads.
+The fastest scheduling option for the first critical
+section was Dynamic, 16. For the second critical section
+Dynamic, 8 resulted in the fastest average execution time.
+
+Table~\ref{tab:p2} lists the average and median execution
+time in seconds for both scheduling options when run
+with 1, 2, 4, 6, 8, 12 and 16 threads.
+
+Figure~\ref{fig:speedup} displays how much using more
+threads gains in exectution speed, compared to using just
+one thread (sequential execution).
+While for the first critical section the speedup of using
+more threads grows linear, the execution time for the
+second critical section stops being faster after 6
+threads (see Table~\ref{tab:p2}, Figure~\ref{fig:speedup}).
+
 % describe phase two results
 
 % critical section 1 scales linearly, section 2 stops at
@@ -420,6 +438,7 @@ TODO: phase two results.
   fastest scheduling options from phase one, for each
   critical section, executed with different amounts of
   threads.}
+\label{tab:p2}
 \end{center}
 \end{table}
 
@@ -494,6 +513,7 @@ TODO: phase two results.
 \caption{Plots on how the execution speed varies with the
   amount of threads. The plots show how much faster more
   threads are, compared to just one thread.}
+\label{fig:speedup}
 \end{figure}
 % }}}
 
