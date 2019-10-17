@@ -168,8 +168,11 @@ Instead, $\jmax(i)$ equals either 1 or $n$ and the
 distribution of $\jmax(i) = n$ is asymmetric, since
 the modulus in (\ref{eq:jmax}) changes depending on the
 iteration $i$.
-The consequence is, that for small $i$, $\jmax(i) = n$
-more often, which means that the first iterations are
+For example, $\jmax(i) = n$ for every element in the
+interval $i \in (1, 29)$, while $\jmax(i) = n$ is true for
+only 7 elements in $i \in (30, 59)$ and the amount keeps
+decreasing with bigger $i$.
+This has the consequence, that the first iterations are
 computationally more heavy and time consuming than
 the later iterations.
 
@@ -210,49 +213,15 @@ execution speed.
 
 \section{Results}
 
-Table~\ref{tab:p1} lists the average and median
-walltime in seconds for the execution of the critical
-sections, determined in phase one of the benchmark.
-% describe phase one results
-
-% critical section 1: all schedules just minor differences
-
-% critical section 2: under 3s: just dyn, 1-16, stat, 2-8
-
-% static 2-8 majorly outperform static
-
-% chunk size has big influence (see static, dyn)
-% -> except guided
-
-
-% describe phase two results
-
-% critical section 1 scales linearly, section 2 stops at
-% 6 threads
-
-% discussion: answer questions raised in results
-
-% why is dyn fastest ?
-
+% phase one fig, table {{{
 \begin{table}
 \begin{center}
 \input{meta_loop_perm}
 \caption{Results of phase one of the benchmark. Displayed
   are average and median walltime in seconds for every
   scheduling option for both critical sections. The fastest
-  scheduling options are marked with bold font-weight.}
+  scheduling options are marked with a bold font-weight.}
 \label{tab:p1}
-\end{center}
-\end{table}
-
-\begin{table}
-\begin{center}
-\input{fastest_meta_loop_perm}
-\caption{Results of phase two of the benchmark. Displayed
-  are average and median walltime in seconds for the
-  fastest scheduling options from phase one, for each
-  critical section, executed with different amounts of
-  threads.}
 \end{center}
 \end{table}
 
@@ -266,9 +235,9 @@ sections, determined in phase one of the benchmark.
     visualize as line/.list={dynamic,guided, static},
     style sheet=vary dashing,
     style sheet=cross marks,
-    dynamic={label in legend={text=dynamic}},
-    guided={label in legend={text=guided}},
-    static={label in legend={text=static}},
+    dynamic={label in legend={text=Dynamic}},
+    guided={label in legend={text=Guided}},
+    static={label in legend={text=Static}},
     x axis={
       logarithmic,
       ticks={major={at={1,2,4,8,16,32,64} } },
@@ -325,9 +294,9 @@ sections, determined in phase one of the benchmark.
     visualize as line/.list={dynamic,guided, static},
     style sheet=vary dashing,
     style sheet=cross marks,
-    dynamic={label in legend={text=dynamic}},
-    guided={label in legend={text=guided}},
-    static={label in legend={text=static}},
+    dynamic={label in legend={text=Dynamic}},
+    guided={label in legend={text=Guided}},
+    static={label in legend={text=Static}},
     x axis={
       logarithmic,
       ticks={major={at={1,2,4,8,16,32,64 } } },
@@ -376,9 +345,83 @@ sections, determined in phase one of the benchmark.
 \vspace{0.5cm}
 \end{subfigure}
 \caption{Plots on how the chunk size clause changes the
-  execution speed of the dynamic, guided and static
+  execution speed of the Dynamic, Guided and Static
   scheduling options, for both critical sections.}
+\label{fig:chunk_size}
 \end{figure}
+% }}}
+
+Table~\ref{tab:p1} lists the average and median
+walltime in seconds for the execution of the critical
+sections, determined in phase one of the benchmark.
+
+Sequential is not a schedule. It represents execution time
+of the critical section in a sequential, not parallelized
+manner.
+
+One can see, that for the first---the symmetric---critical
+section the schedules do not differentiate much concerning
+the execution time.
+Especially the Auto, Dynamic, $n$ and Guided, $n$
+scheduling options are all between $0.48$ and $0.52$
+seconds of average execution time.
+Static, $n$ performs slightly worse, all options having
+an average execution time between $0.51$ and $0.56$
+seconds, except Static, 64, which performs worse with an
+average execution time of 0.62 seconds.
+The Static scheduling option, which just splits the
+iterations in \#threads (in this case four) approximately
+equal chunks, performs the worst with an average execution
+time of 0.83 seconds \citep[see][]{lecture}.
+
+The best scheduling option for the first critical section
+is Dynamic, 16, with an average and median execution time
+of 0.48 seconds.
+
+The schedules differ much more in execution time for
+the second critical section, compared to the first one.
+
+The difference between Dynamic, 8 (fastest) and Static
+(slowest) is nearly 4 seconds, which makes Static
+approximately 2.8 times slower than Dynamic, 8.
+For comparison, the slowest scheduling option for
+the first critical section is just approximately 1.7 times
+slower than the fastest scheduling option.
+
+Guided, $n$ and Auto, which were close to fastest in
+the first critical section, perform worse on the
+section critical section. All are approximately 2.4 times
+slower than Dynamic, 8.
+
+Static, $n$ fluctuates the most with different chunk
+size $n$.
+Static, 8, with 2.37 seconds average execution time, is
+the third fastest scheduling option, while Static, 64
+is the second slowest scheduling option with 5.37 seconds
+average execution time.
+
+The fluctuation of the average execution time, based
+on different chunk sizes can be seen in
+Figure~\ref{fig:chunk_size}.
+
+TODO: phase two results.
+% describe phase two results
+
+% critical section 1 scales linearly, section 2 stops at
+% 6 threads
+
+
+% phase two fig, table {{{
+\begin{table}
+\begin{center}
+\input{fastest_meta_loop_perm}
+\caption{Results of phase two of the benchmark. Displayed
+  are average and median walltime in seconds for the
+  fastest scheduling options from phase one, for each
+  critical section, executed with different amounts of
+  threads.}
+\end{center}
+\end{table}
 
 \begin{figure}
 \begin{subfigure}{\textwidth}
@@ -452,8 +495,14 @@ sections, determined in phase one of the benchmark.
   amount of threads. The plots show how much faster more
   threads are, compared to just one thread.}
 \end{figure}
+% }}}
 
 \section{Discussion}
+
+% discussion: why???
+% answer questions raised in results
+
+% why is dyn fastest ?
 
 \section{Conclusion}
 
