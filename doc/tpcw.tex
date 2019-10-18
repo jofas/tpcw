@@ -85,7 +85,7 @@ scheduling options for both critical sections scale with
 different amounts of threads.
 
 OpenMP version 4.5 was used and the benchmark was performed
-on the backend of the Cirrus supercomputer
+on the back end of the Cirrus supercomputer
 \citep[see][]{openmp, cirrus}.
 The program was compiled with the Intel Fortran Compiler
 (\texttt{ifort}) version 17.0.2, with the maximum
@@ -99,6 +99,7 @@ discussed and a conclusion is drawn.
 % }}}
 
 \section{Experiment} % {{{
+\label{sec:exp}
 
 This chapter will describe the performed benchmark.
 First the two critical sections are described
@@ -199,7 +200,7 @@ are then run with 1, 2, 4, 6, 8, 12 and 16 threads during
 the second phase of the benchmark.
 
 Like stated in the introduction, both benchmark phases are
-executed on the Cirrus backend with exclusive access to one
+executed on the Cirrus back end with exclusive access to one
 node.
 Every scheduling option in phase one and every amount of
 threads in phase two were executed 100 times and the
@@ -208,10 +209,11 @@ with the timing routine \texttt{omp\_get\_wtime}, provided
 by OpenMP \citep[see][Chapter 3.4.1]{openmp}.
 The average walltime was used as the decisive criteria for
 execution speed.
+The mean was used as the secondary criteria.
 
 % }}}
 
-\section{Results}
+\section{Results} % {{{
 
 % phase one fig, table {{{
 \begin{table}
@@ -423,12 +425,6 @@ more threads grows linear, the execution time for the
 second critical section stops being faster after 6
 threads (see Table~\ref{tab:p2}, Figure~\ref{fig:speedup}).
 
-% describe phase two results
-
-% critical section 1 scales linearly, section 2 stops at
-% 6 threads
-
-
 % phase two fig, table {{{
 \begin{table}
 \begin{center}
@@ -517,14 +513,46 @@ threads (see Table~\ref{tab:p2}, Figure~\ref{fig:speedup}).
 \end{figure}
 % }}}
 
+% }}}
+
 \section{Discussion}
 
-% discussion: why???
-% answer questions raised in results
+There are several statements to make about why some
+scheduling options outperform each other.
 
-% why is dyn fastest ?
+For the first critical section only Static and Static, $n$
+perform worse than the others.
+Guided, $n$ has approximately the same performance
+as Dynamic, $n$ (also it is more constant with different
+chunk sizes). This suggests, that the reason why Static and
+Static, $n$ perform worse must lie in the later iterations.
+This could have two reasons: (\romannumeral 1) longer
+indexing of $B(i, j)$; (\romannumeral 2) $\cos(x)$ takes
+longer to compute for bigger $x$
+(see Equation~\ref{eq:cs1}).
+Problem (\romannumeral 2) could easily be solved by
+setting $B(i, j) = B(i, j) \mod 2\pi$, since if
+$x \equiv y (\text{mod }2\pi)$, then $\cos(x) = \cos(y)$
+(follows from the fact that $\cos(x)$ has $2\pi$ as its
+period) \citep[see e.g.][]{trig}.
+
+% here results for second critical section
+
+% first iter now worse than last => guided sucks, big static sucks
+% auto can not adopt
+
+% big n suck for both, since iterations are so asymmetrical
+% small n suck in general, because switching overhead
+
+% phase 2: why tf does cs2 not scale
+
 
 \section{Conclusion}
+
+% even though cs1 looks symmetric, for big values it gets
+% worse
+
+
 
 \bibliography{tpcw.bib}
 
