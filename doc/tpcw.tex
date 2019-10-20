@@ -51,9 +51,33 @@
 \maketitle
 
 \begin{abstract}
+The benchmark of a scientific program presented in this
+paper compares different OpenMP schedules based on how well
+they increase the execution speed.
+
+The scientific program contains two critical sections which
+are suitable for speeding up with the OpenMP parallel
+do-loop directive.
+Both were tested with different schedules on four threads
+and the fastest schedule for each section was determined.
+In the second phase of the benchmark it was tested how well
+the fastest schedules scale with less and more than four
+threads.
+
+The benchmark was executed on the Cirrus supercomputer with
+exclusive access to one back end node.
+The results of this benchmark show, that, based on the
+schedule alone the speed can increase by a factor of 2.7.
+This paper discusses the results of the benchmark and
+furthermore raises questions concerning performance
+anomalies and further optimizations.
+Further ideas for a follow-up benchmark testing changes
+which could result in higher performance are given.
+
 \end{abstract}
 
 \begin{keywords}
+OpenMP, parallel computing
 \end{keywords}
 
 \section{Introduction} % {{{
@@ -77,11 +101,11 @@ among the OpenMP threads
 
 The benchmark consists of two phases.
 The goal of the first phase is to compare different
-scheduling options of the OpenMP library and how they
+schedules of the OpenMP library and how they
 effect the execution speed (measured in seconds) of the two
 critical sections of the program.
 The second phase provides data on how well the fastest
-scheduling options for both critical sections scale with
+schedules for both critical sections scale with
 different amounts of threads.
 
 OpenMP version 4.5 was used and the benchmark was performed
@@ -101,10 +125,6 @@ discussed and a conclusion is drawn.
 \section{Experiment} % {{{
 \label{sec:exp}
 
-This chapter will describe the performed benchmark.
-First the two critical sections are described
-mathematically, followed by a description of the benchmark.
-
 Let $n \in \mathbb{N}$ be a positive integer.
 Let $A: n \times n$ and $B: n \times n$ be two matrices,
 $A, B \in \mathbb{R}^n \times \mathbb{R}^n$.
@@ -119,6 +139,7 @@ The first critical section updates $A$:
   \label{eq:cs1}
   A(i, j) = A(i, j) + \cos(B(i, j)); i,j=1,\dots,n.
 \end{align}
+This equation in matrix form would be: $A = A + \cos(B)$.
 
 Both critical sections are executed multiple times, which
 is the reason $A(i, j)$ on the right-hand side of
@@ -154,12 +175,12 @@ Since both (\ref{eq:cs1}) and (\ref{eq:cs2}) are
 element-wise independent, the computation of every element
 can be distributed over multiple processes.
 
-It should be noted here, that (\ref{eq:cs1}) is a perfect
-computational cube of $n \times n$.
+It should be noted here, that (\ref{eq:cs1}) looks
+computationally symmetric.
 That means, that every iteration---each a manipulation
-of a single cell $A(i, j)$---contains the same amount of
-instructions, making it trivial to split the iterations
-and having a balanced distribution of work per thread.
+of a single cell $A(i, j)$---is the same operation,
+making it trivial to split the iterations and having a
+balanced distribution of work per thread.
 
 On the other hand one can see that (\ref{eq:cs2}) does not
 behave in the same way.
@@ -177,16 +198,8 @@ This has the consequence, that the first iterations are
 computationally more heavy and time consuming than
 the later iterations.
 
-The benchmark consists of two phases.
-In the first phase, different scheduling options are
-compared using four threads and the fastest scheduling
-option for each critical section is determined.
-The second part of the benchmark tests how well the
-fastest scheduling options scale with different amounts of
-threads.
-For the benchmark $n$ was set to 729.
-
-The different scheduling options used in the first phase
+For both phases of the benchmark, $n$ was set to 729.
+The different schedules used in the first phase
 are:
 \begin{itemize}
   \item Auto
@@ -195,21 +208,22 @@ are:
     chunk sizes of: 1, 2, 4, 8, 16, 32, 64
 \end{itemize}
 
-The fastest scheduling options for the critical sections
+The fastest schedules for the critical sections
 are then run with 1, 2, 4, 6, 8, 12 and 16 threads during
 the second phase of the benchmark.
 
 Like stated in the introduction, both benchmark phases are
-executed on the Cirrus back end with exclusive access to one
-node.
-Every scheduling option in phase one and every amount of
+executed on the Cirrus back end with exclusive access to
+one node.
+Every schedule from phase one and every amount of
 threads in phase two were executed 100 times and the
 average and median walltime---in seconds---were measured
 with the timing routine \texttt{omp\_get\_wtime}, provided
 by OpenMP \citep[see][Chapter 3.4.1]{openmp}.
 The average walltime was used as the decisive criteria for
 execution speed.
-The mean was used as the secondary criteria.
+The median was used as the secondary, tie-breaking
+criteria.
 
 % }}}
 
@@ -221,8 +235,8 @@ The mean was used as the secondary criteria.
 \input{meta_loop_perm}
 \caption{Results of phase one of the benchmark. Displayed
   are average and median walltime in seconds for every
-  scheduling option for both critical sections. The fastest
-  scheduling options are marked with a bold font-weight.}
+  schedule for both critical sections. The fastest
+  schedules are marked with a bold font-weight.}
 \label{tab:p1}
 \end{center}
 \end{table}
@@ -348,7 +362,7 @@ The mean was used as the secondary criteria.
 \end{subfigure}
 \caption{Plots on how the chunk size clause changes the
   execution speed of the Dynamic, Guided and Static
-  scheduling options, for both critical sections.}
+  schedules, for both critical sections.}
 \label{fig:chunk_size}
 \end{figure}
 % }}}
@@ -365,18 +379,18 @@ One can see, that for the first---the symmetric---critical
 section the schedules do not differentiate much concerning
 the execution time.
 Especially the Auto, Dynamic, $n$ and Guided, $n$
-scheduling options are all between $0.48$ and $0.52$
+schedules produce results between $0.48$ and $0.52$
 seconds of average execution time.
-Static, $n$ performs slightly worse, all options having
+Static, $n$ performs slightly worse, all producing
 an average execution time between $0.51$ and $0.56$
 seconds, except Static, 64, which performs worse with an
 average execution time of 0.62 seconds.
-The Static scheduling option, which just splits the
+The Static schedule, which just splits the
 iterations in \#threads (in this case four) approximately
 equal chunks, performs the worst with an average execution
 time of 0.83 seconds \citep[see][]{lecture}.
 
-The best scheduling option for the first critical section
+The best schedule for the first critical section
 is Dynamic, 16, with an average and median execution time
 of 0.48 seconds.
 
@@ -386,20 +400,20 @@ the second critical section, compared to the first one.
 The difference between Dynamic, 8 (fastest) and Static
 (slowest) is nearly 4 seconds, which makes Static
 approximately 2.8 times slower than Dynamic, 8.
-For comparison, the slowest scheduling option for
+For comparison, the slowest schedule for
 the first critical section is just approximately 1.7 times
-slower than the fastest scheduling option.
+slower than the fastest schedule.
 
-Guided, $n$ and Auto, which were close to fastest in
+Guided, $n$ and Auto, which were close to fastest for
 the first critical section, perform worse on the
 section critical section. All are approximately 2.4 times
 slower than Dynamic, 8.
 
 Static, $n$ fluctuates the most with different chunk
-size $n$.
+sizes $n$.
 Static, 8, with 2.37 seconds average execution time, is
-the third fastest scheduling option, while Static, 64
-is the second slowest scheduling option with 5.37 seconds
+the third fastest schedule, while Static, 64
+is the second slowest schedule with 5.37 seconds
 average execution time.
 
 The fluctuation of the average execution time, based
@@ -409,12 +423,12 @@ Figure~\ref{fig:chunk_size}.
 During the second phase of the benchmark the two scheduling
 options resulting in the fastest average execution time
 were tested with different amounts of threads.
-The fastest scheduling option for the first critical
+The fastest schedule for the first critical
 section was Dynamic, 16. For the second critical section
 Dynamic, 8 resulted in the fastest average execution time.
 
 Table~\ref{tab:p2} lists the average and median execution
-time in seconds for both scheduling options when run
+time in seconds for both schedules when run
 with 1, 2, 4, 6, 8, 12 and 16 threads.
 
 Figure~\ref{fig:speedup} displays how much using more
@@ -431,7 +445,7 @@ threads (see Table~\ref{tab:p2}, Figure~\ref{fig:speedup}).
 \input{fastest_meta_loop_perm}
 \caption{Results of phase two of the benchmark. Displayed
   are average and median walltime in seconds for the
-  fastest scheduling options from phase one, for each
+  fastest schedules from phase one, for each
   critical section, executed with different amounts of
   threads.}
 \label{tab:p2}
@@ -515,16 +529,24 @@ threads (see Table~\ref{tab:p2}, Figure~\ref{fig:speedup}).
 
 % }}}
 
-\section{Discussion}
+\newpage
+
+\section{Discussion} % {{{
 
 There are several statements to make about why some
-scheduling options outperform each other.
+schedules outperform each other.
+It should be noted that this chapter discusses some ideas
+on why the performance of different schedules
+differ.
+Follow-up benchmarks would be needed to confirm or refute
+them.
 
-For the first critical section only Static and Static, $n$
-perform worse than the others.
+During the first critical section only Static and Static,
+$n$ perform worse than the others.
 Guided, $n$ has approximately the same performance
-as Dynamic, $n$ (also it is more constant with different
-chunk sizes). This suggests, that the reason why Static and
+as Dynamic, $n$ (it is even more constant over the
+different chunk sizes).
+This suggests, that the reason why Static and
 Static, $n$ perform worse must lie in the later iterations.
 This could have two reasons: (\romannumeral 1) longer
 indexing of $B(i, j)$; (\romannumeral 2) $\cos(x)$ takes
@@ -536,23 +558,71 @@ $x \equiv y (\text{mod }2\pi)$, then $\cos(x) = \cos(y)$
 (follows from the fact that $\cos(x)$ has $2\pi$ as its
 period) \citep[see e.g.][]{trig}.
 
-% here results for second critical section
+The second critical section behaves the opposite, having
+the more time consuming iterations at the beginning of
+the loop.
+This is validated by the bad performance of the Dynamic,
+$n$ schedules, which take bigger chunks at the beginning,
+making them smaller the more iterations are already done.
+This is why all produce the same average execution time.
+The first iterations are the bottleneck of the second
+critical section.
 
-% first iter now worse than last => guided sucks, big static sucks
-% auto can not adopt
+The high imbalance is also the reason the Static, Dynamic
+and Guided schedules with higher chunk sizes are
+outperformed by smaller ones, since the better the first
+iterations are distributed among multiple threads, the
+faster the imbalance---the bottleneck---gets executed.
 
-% big n suck for both, since iterations are so asymmetrical
-% small n suck in general, because switching overhead
+On the other hand, Static, 1 and Dynamic, 1 are again
+worse than bigger chunk sizes (2, 4, 8).
+This could be the result of the higher amounts of context
+switching and higher costs for scheduling the execution.
 
-% phase 2: why tf does cs2 not scale
+The imbalance is also the reason for the lack of speedup
+with more threads for the Dynamic, 8 schedule, determined
+as fastest for the second critical section during phase one
+(see Table~\ref{tab:p2}, Figure~\ref{fig:speedup}).
+The Dynamic schedule with a smaller chunk size would
+probably scale better with more threads.
 
+% }}}
 
-\section{Conclusion}
+\section{Conclusion} % {{{
 
-% even though cs1 looks symmetric, for big values it gets
-% worse
+The benchmark shows, using an optimized schedule for
+a certain problem can increase the performance drastically.
 
+The fastest schedule for the first critical section is
+approximately 1.7 times faster than the slowest.
+The second critical section---more imbalanced than the
+first---produces even more severe performance differences,
+the fastest schedule being approximately 2.8 times faster
+than the slowest.
 
+On the other hand, a couple of questions about further
+performance increasing changes are raised.
+
+The results for the first critical section suggests, that
+later iterations are more computationally expensive than
+the first, even though the first critical section looks
+like the perfect computational cube.
+Two reasons possible reasons are mentioned,
+(\romannumeral 1) higher cost of indexing a
+multidimensional array with bigger indices and
+(\romannumeral 2) $\cos(x)$ takes more time for bigger $x$.
+
+The other question is, if for the second critical section
+schedules with smaller chunk sizes scale better (because
+they better divide the bottleneck created by the
+computational imbalance over the iterations) with more
+threads than the best schedule determined on four, like
+done in this benchmark.
+
+To answer those two raised questions, a follow-up benchmark
+is necessary.
+
+% }}}
 
 \bibliography{tpcw.bib}
 
