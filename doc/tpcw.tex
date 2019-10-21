@@ -67,7 +67,9 @@ threads.
 The benchmark was executed on the Cirrus supercomputer with
 exclusive access to one back end node.
 The results of this benchmark show, that, based on the
-schedule alone the speed can increase by a factor of 2.7.
+schedule alone the execution speed can increase by a factor
+of 2.7.
+
 This paper discusses the results of the benchmark and
 furthermore raises questions concerning performance
 anomalies and further optimizations.
@@ -137,13 +139,10 @@ $B(i, j) = \pi(i+j); i,j=1,\dots,n$.
 The first critical section updates $A$:
 \begin{align}
   \label{eq:cs1}
-  A(i, j) = A(i, j) + \cos(B(i, j)); i,j=1,\dots,n.
+  A(i, j) = A(i, j) + \cos(B(i, j)); j=1,\dots,n; i=j,\dots,n.
 \end{align}
-This equation in matrix form would be: $A = A + \cos(B)$.
-
-Both critical sections are executed multiple times, which
-is the reason $A(i, j)$ on the right-hand side of
-(\ref{eq:cs1}) can not be substituted to 0.
+$i$ depends on $j$, making the workload of every iteration
+over $j$ smaller with increasing $j$.
 
 \def\jmax{\vec{j}_{\text{max} }}
 
@@ -175,18 +174,17 @@ Since both (\ref{eq:cs1}) and (\ref{eq:cs2}) are
 element-wise independent, the computation of every element
 can be distributed over multiple processes.
 
-It should be noted here, that (\ref{eq:cs1}) looks
-computationally symmetric.
-That means, that every iteration---each a manipulation
-of a single cell $A(i, j)$---is the same operation,
-making it trivial to split the iterations and having a
-balanced distribution of work per thread.
+Both critical sections are computationally asymmetric, both
+having more demanding iterations at the beginning.
+While---for the first critical section---the amount of
+computations decrease linearly ($i$ depends on $j$---see
+Equation~\ref{eq:cs1}), the amount of computation for the
+second critical section drops even more within higher
+iterations.
 
-On the other hand one can see that (\ref{eq:cs2}) does not
-behave in the same way.
-Each iteration is dependent on $\jmax(i)$, which is not
-constant.
-Instead, $\jmax(i)$ equals either 1 or $n$ and the
+The amount of computations in the second critical section
+is dependent on $\jmax$.
+$\jmax(i)$ equals either 1 or $n$ and the
 distribution of $\jmax(i) = n$ is asymmetric, since
 the modulus in (\ref{eq:jmax}) changes depending on the
 iteration $i$.
@@ -194,9 +192,6 @@ For example, $\jmax(i) = n$ for every element in the
 interval $i \in (1, 29)$, while $\jmax(i) = n$ is true for
 only 7 elements in $i \in (30, 59)$ and the amount keeps
 decreasing with bigger $i$.
-This has the consequence, that the first iterations are
-computationally more heavy and time consuming than
-the later iterations.
 
 For both phases of the benchmark, $n$ was set to 729.
 The different schedules used in the first phase
@@ -375,8 +370,8 @@ Sequential is not a schedule. It represents execution time
 of the critical section in a sequential, not parallelized
 manner.
 
-One can see, that for the first---the symmetric---critical
-section the schedules do not differentiate much concerning
+One can see, for the first critical section the
+schedules do not differentiate much concerning
 the execution time.
 Especially the Auto, Dynamic, $n$ and Guided, $n$
 schedules produce results between $0.48$ and $0.52$
@@ -396,7 +391,6 @@ of 0.48 seconds.
 
 The schedules differ much more in execution time for
 the second critical section, compared to the first one.
-
 The difference between Dynamic, 8 (fastest) and Static
 (slowest) is nearly 4 seconds, which makes Static
 approximately 2.8 times slower than Dynamic, 8.
@@ -529,39 +523,70 @@ threads (see Table~\ref{tab:p2}, Figure~\ref{fig:speedup}).
 
 % }}}
 
-\newpage
-
 \section{Discussion} % {{{
 
 There are several statements to make about why some
 schedules outperform each other.
-It should be noted that this chapter discusses some ideas
-on why the performance of different schedules
+It should be noted here, that this chapter discusses some
+ideas on why the performance of different schedules
 differ.
 Follow-up benchmarks would be needed to confirm or refute
 them.
 
-During the first critical section only Static and Static,
-$n$ perform worse than the others.
-Guided, $n$ has approximately the same performance
-as Dynamic, $n$ (it is even more constant over the
-different chunk sizes).
-This suggests, that the reason why Static and
-Static, $n$ perform worse must lie in the later iterations.
-This could have two reasons: (\romannumeral 1) longer
-indexing of $B(i, j)$; (\romannumeral 2) $\cos(x)$ takes
+%During the first critical section only Static and Static,
+%$n$ perform worse than the others.
+%Guided, $n$ has approximately the same performance
+%as Dynamic, $n$ (it is even more constant over the
+%different chunk sizes).
+%This suggests, that the reason why Static and
+%Static, $n$ perform worse must lie in the later iterations.
+
+%This could have two reasons: (\romannumeral 1) longer
+%indexing of $B(i, j)$; (\romannumeral 2) $\cos(x)$ takes
+%longer to compute for bigger $x$
+%(see Equation~\ref{eq:cs1}).
+%Problem (\romannumeral 2)
+
+%This could easily be solved by
+%setting $B(i, j) = B(i, j) \mod 2\pi$, since if
+%$x \equiv y (\text{mod }2\pi)$, then $\cos(x) = \cos(y)$
+%(follows from the fact that $\cos(x)$ has $2\pi$ as its
+%period) \citep[see e.g.][]{trig}.
+
+%The second critical section behaves the opposite, having
+%the more time consuming iterations at the beginning of
+%the loop.
+
+Both critical sections are asymmetric when it comes to the
+computational distribution, both having more computations
+to do during the first iterations.
+
+This is not validated for the first critical section.
+Guided, $n$, which splits the first iterations into bigger
+chunks, reducing the chunk size over the iterations
+\citep[see][]{lecture}, does perform nearly best (see
+Table~\ref{tab:p1}).
+On the other hand, Static and Static, $n$ are the worst
+performing schedules. This is suggestive of an asymmetry
+in the computational distribution.
+A factor, which could regulate the asymmetry of the
+first critical section, could be, that $\cos(x)$ takes
 longer to compute for bigger $x$
 (see Equation~\ref{eq:cs1}).
-Problem (\romannumeral 2) could easily be solved by
+While less iterations over $i$ are needed in
+(\ref{eq:cs1}) with bigger $j$, $B(i, j)$ contains bigger
+values, which could lead to $\cos(x)$ taking longer to
+compute.
+This could easily be solved by
 setting $B(i, j) = B(i, j) \mod 2\pi$, since if
 $x \equiv y (\text{mod }2\pi)$, then $\cos(x) = \cos(y)$
 (follows from the fact that $\cos(x)$ has $2\pi$ as its
-period) \citep[see e.g.][]{trig}.
+period, see e.g. \citet{trig}).
+This statement needs to be validated by a follow-up
+benchmark.
 
-The second critical section behaves the opposite, having
-the more time consuming iterations at the beginning of
-the loop.
-This is validated by the bad performance of the Dynamic,
+The asymmetry of the second critical section on the other
+hand, is validated by the bad performance of the Dynamic,
 $n$ schedules, which take bigger chunks at the beginning,
 making them smaller the more iterations are already done.
 This is why all produce the same average execution time.
@@ -584,7 +609,8 @@ with more threads for the Dynamic, 8 schedule, determined
 as fastest for the second critical section during phase one
 (see Table~\ref{tab:p2}, Figure~\ref{fig:speedup}).
 The Dynamic schedule with a smaller chunk size would
-probably scale better with more threads.
+probably scale better with more threads, which, again,
+must be validated by a follow-up benchmark.
 
 % }}}
 
@@ -605,12 +631,11 @@ performance increasing changes are raised.
 
 The results for the first critical section suggests, that
 later iterations are more computationally expensive than
-the first, even though the first critical section looks
-like the perfect computational cube.
-Two reasons possible reasons are mentioned,
-(\romannumeral 1) higher cost of indexing a
-multidimensional array with bigger indices and
-(\romannumeral 2) $\cos(x)$ takes more time for bigger $x$.
+they seem, or at least that Dynamic, $n$ does not suffer
+a performance decrease by the asymmetry of the
+computational distribution, which seems strange.
+The possibility of $\cos(x)$ taking longer to compute for
+bigger was mentioned, which needs to be validated.
 
 The other question is, if for the second critical section
 schedules with smaller chunk sizes scale better (because
