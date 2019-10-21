@@ -533,30 +533,6 @@ differ.
 Follow-up benchmarks would be needed to confirm or refute
 them.
 
-%During the first critical section only Static and Static,
-%$n$ perform worse than the others.
-%Guided, $n$ has approximately the same performance
-%as Dynamic, $n$ (it is even more constant over the
-%different chunk sizes).
-%This suggests, that the reason why Static and
-%Static, $n$ perform worse must lie in the later iterations.
-
-%This could have two reasons: (\romannumeral 1) longer
-%indexing of $B(i, j)$; (\romannumeral 2) $\cos(x)$ takes
-%longer to compute for bigger $x$
-%(see Equation~\ref{eq:cs1}).
-%Problem (\romannumeral 2)
-
-%This could easily be solved by
-%setting $B(i, j) = B(i, j) \mod 2\pi$, since if
-%$x \equiv y (\text{mod }2\pi)$, then $\cos(x) = \cos(y)$
-%(follows from the fact that $\cos(x)$ has $2\pi$ as its
-%period) \citep[see e.g.][]{trig}.
-
-%The second critical section behaves the opposite, having
-%the more time consuming iterations at the beginning of
-%the loop.
-
 Both critical sections are asymmetric when it comes to the
 computational distribution, both having more computations
 to do during the first iterations.
