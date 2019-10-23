@@ -67,13 +67,13 @@ threads.
 The benchmark was executed on the Cirrus supercomputer with
 exclusive access to one back end node.
 The results of this benchmark show, that, based on the
-schedule alone the execution speed can increase by a factor
-of 2.7.
+schedule alone, the execution speed can increase by a
+factor of 2.8.
 
 This paper discusses the results of the benchmark and
 furthermore raises questions concerning performance
 anomalies and further optimizations.
-Further ideas for a follow-up benchmark testing changes
+Ideas for a follow-up benchmark testing changes
 which could result in higher performance are given.
 
 \end{abstract}
@@ -179,7 +179,7 @@ having more demanding iterations at the beginning.
 While---for the first critical section---the amount of
 computations decrease linearly ($i$ depends on $j$---see
 Equation~\ref{eq:cs1}), the amount of computation for the
-second critical section drops even more within higher
+second critical section drops even more for higher
 iterations.
 
 The amount of computations in the second critical section
@@ -409,9 +409,8 @@ Static, 8, with 2.37 seconds average execution time, is
 the third fastest schedule, while Static, 64
 is the second slowest schedule with 5.37 seconds
 average execution time.
-
 The fluctuation of the average execution time, based
-on different chunk sizes can be seen in
+on different chunk sizes, can be seen in
 Figure~\ref{fig:chunk_size}.
 
 During the second phase of the benchmark the two scheduling
@@ -420,13 +419,12 @@ were tested with different amounts of threads.
 The fastest schedule for the first critical
 section was Dynamic, 16. For the second critical section
 Dynamic, 8 resulted in the fastest average execution time.
-
 Table~\ref{tab:p2} lists the average and median execution
 time in seconds for both schedules when run
 with 1, 2, 4, 6, 8, 12 and 16 threads.
 
 Figure~\ref{fig:speedup} displays how much using more
-threads gains in exectution speed, compared to using just
+threads gains in execution speed, compared to using just
 one thread (sequential execution).
 While for the first critical section the speedup of using
 more threads grows linear, the execution time for the
@@ -563,9 +561,9 @@ benchmark.
 
 The asymmetry of the second critical section on the other
 hand, is validated by the bad performance of the Dynamic,
-$n$ schedules, which take bigger chunks at the beginning,
-making them smaller the more iterations are already done.
-This is why all produce the same average execution time.
+$n$ schedules.
+This is the reason why all produce the same average
+execution time.
 The first iterations are the bottleneck of the second
 critical section.
 
@@ -602,8 +600,10 @@ first---produces even more severe performance differences,
 the fastest schedule being approximately 2.8 times faster
 than the slowest.
 
-On the other hand, a couple of questions about further
-performance increasing changes are raised.
+Even though better schedules were determined, this
+benchmark raises questions about itself, which should be
+addressed in a follow-up benchmark.
+This could lead to even better performing schedules.
 
 The results for the first critical section suggests, that
 later iterations are more computationally expensive than
@@ -619,9 +619,6 @@ they better divide the bottleneck created by the
 computational imbalance over the iterations) with more
 threads than the best schedule determined on four, like
 done in this benchmark.
-
-To answer those two raised questions, a follow-up benchmark
-is necessary.
 
 % }}}
 
