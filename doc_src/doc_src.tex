@@ -1,0 +1,55 @@
+\documentclass[twoside,11pt]{article}
+\PassOptionsToPackage{hyphens}{url}
+\usepackage{jmlr2e}
+\usepackage{amsmath}
+\usepackage[toc,page]{appendix}
+\usepackage[table]{xcolor}
+\usepackage[marginparsep=30pt]{geometry}
+\usepackage{stmaryrd}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{tikz}
+\usepackage{tabu}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{listings}
+\usepackage{fancyref}
+\usepackage{relsize}
+\usepackage{float}
+\usepackage{subcaption}
+
+\usetikzlibrary{%
+    arrows,
+    arrows.meta,
+    decorations,
+    backgrounds,
+    positioning,
+    fit,
+    petri,
+    shadows,
+    datavisualization.formats.functions,
+    calc,
+    shapes,
+    shapes.multipart,
+    matrix
+}
+
+\def\titl{Threaded Programming coursework I: source code}
+
+\title{\titl}
+
+\author{}
+%\name Jonas Fassbender
+%        \email jonas@fassbender.dev}
+
+\ShortHeadings{B160509}{B160509}
+\firstpageno{1}
+
+
+\begin{document}
+
+\maketitle
+
+\lstinputlisting[language=Fortran]{../loops_f.f90}
+
+\end{document}
