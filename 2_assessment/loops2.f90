@@ -1,6 +1,6 @@
-
 program loops
 
+  use affinity_schedule
   use omp_lib
 
   implicit none
@@ -45,7 +45,6 @@ program loops
 
   print *, "Total time for ",reps," reps of loop 2 = ", end2-start2
 
-
 contains
 
 subroutine init1()
@@ -88,7 +87,6 @@ subroutine init2()
 
 end subroutine init2
 
-
 subroutine runloop(loopid)
 
   implicit none
@@ -96,24 +94,28 @@ subroutine runloop(loopid)
   integer :: loopid, myid, nthreads, ipt, lo, hi
   integer :: remaining_iter, chunk_size
 
-  !$omp parallel default(none) shared(loopid) private( &
+  type(LocalSplit), dimension(:), allocatable :: local_splits
+
+  !$omp parallel default(none) private( &
   !$omp   myid, nthreads, ipt, lo, hi, remaining_iter, &
   !$omp   chunk_size &
-  !$omp )
+  !$omp ) shared(loopid, local_splits)
 
   myid = omp_get_thread_num()
   nthreads = omp_get_num_threads()
   ipt = (N + nthreads - 1)/nthreads
 
-  ! this is basically schedule(static)
+  !$omp single
+  allocate(local_splits(0:nthreads-1))
+  !$omp end single
+
   lo = myid * ipt + 1
   hi = (myid + 1) * ipt
   if (hi > N) hi = N
 
-  ! + 1 since indices inclusive in fortran
   remaining_iter = hi - lo + 1
 
-  !if (myid==0) print *, myid, remaining_iter
+  local_splits(myid) = LocalSplit(remaining_iter, lo, hi)
 
   do
     chunk_size = 1.0 / float(nthreads) * remaining_iter
@@ -124,10 +126,10 @@ subroutine runloop(loopid)
     !if (myid==0) print *, myid, remaining_iter, chunk_size, lo, hi, hi - lo + 1
 
     select case (loopid)
-    case (1)
-      call loop1chunk(lo,hi)
-    case (2)
-      call loop2chunk(lo,hi)
+      case (1)
+        call loop1chunk(lo,hi)
+      case (2)
+        call loop2chunk(lo,hi)
     end select
 
     remaining_iter = remaining_iter - chunk_size
@@ -135,6 +137,10 @@ subroutine runloop(loopid)
 
     if (remaining_iter == 0) exit
   end do
+
+  !TODO: here take from other locals
+  !      -> share remaining_iter, hi
+  !      -> update remaining_iter and hi
 
   !$omp end parallel
 
