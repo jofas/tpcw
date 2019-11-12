@@ -5,7 +5,7 @@ program loops
 
   implicit none
   integer, parameter :: N=729
-  !integer, parameter :: N=300
+  !integer, parameter :: N=400
   integer, parameter :: reps=1000
 
   real(kind=8), allocatable ::  a(:,:), b(:,:), c(:)
@@ -91,56 +91,31 @@ subroutine runloop(loopid)
 
   implicit none
 
-  integer :: loopid, myid, nthreads, ipt, lo, hi
-  integer :: remaining_iter, chunk_size
+  integer, intent(in) :: loopid
+  integer :: myid
 
-  type(LocalSplit), dimension(:), allocatable :: local_splits
+  type(AffinitySchedule) :: schedule
+  type(Interval) :: interv
 
-  !$omp parallel default(none) private( &
-  !$omp   myid, nthreads, ipt, lo, hi, remaining_iter, &
-  !$omp   chunk_size &
-  !$omp ) shared(loopid, local_splits)
+  !$omp parallel default(none)  private(myid, interv) &
+  !$omp   shared(loopid, schedule)
 
-  myid = omp_get_thread_num()
-  nthreads = omp_get_num_threads()
-  ipt = (N + nthreads - 1)/nthreads
-
-  !$omp single
-  allocate(local_splits(0:nthreads-1))
-  !$omp end single
-
-  lo = myid * ipt + 1
-  hi = (myid + 1) * ipt
-  if (hi > N) hi = N
-
-  remaining_iter = hi - lo + 1
-
-  local_splits(myid) = LocalSplit(remaining_iter, lo, hi)
+  call init_schedule(schedule, myid, N)
 
   do
-    chunk_size = 1.0 / float(nthreads) * remaining_iter
-    if (chunk_size == 0) chunk_size = 1
-
-    hi = lo + chunk_size - 1
-
-    !if (myid==0) print *, myid, remaining_iter, chunk_size, lo, hi, hi - lo + 1
+    interv = take(schedule, myid)
 
     select case (loopid)
       case (1)
-        call loop1chunk(lo,hi)
+        call loop1chunk(interv%lower,interv%upper)
       case (2)
-        call loop2chunk(lo,hi)
+        call loop2chunk(interv%lower,interv%upper)
     end select
 
-    remaining_iter = remaining_iter - chunk_size
-    lo = hi + 1
-
-    if (remaining_iter == 0) exit
+    if (done(schedule, myid)) exit
   end do
 
-  !TODO: here take from other locals
-  !      -> share remaining_iter, hi
-  !      -> update remaining_iter and hi
+  !TODO: here take from other splits
 
   !$omp end parallel
 
