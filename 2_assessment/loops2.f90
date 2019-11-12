@@ -95,7 +95,7 @@ subroutine runloop(loopid)
   integer :: myid
 
   type(AffinitySchedule) :: schedule
-  type(Interval) :: interv
+  type(OptionInterval) :: interv
 
   !$omp parallel default(none)  private(myid, interv) &
   !$omp   shared(loopid, schedule)
@@ -104,22 +104,41 @@ subroutine runloop(loopid)
 
   do
     interv = take(schedule, myid)
-
-    select case (loopid)
-      case (1)
-        call loop1chunk(interv%lower,interv%upper)
-      case (2)
-        call loop2chunk(interv%lower,interv%upper)
-    end select
-
+    if (.not. interv%is_none) &
+      call do_work(loopid, interv%lower, interv%upper)
     if (done(schedule, myid)) exit
   end do
 
-  !TODO: here take from other splits
+  do
+    interv = take(schedule)
+    !print *, interv%is_none
+    if (.not. interv%is_none) then
+      call do_work(loopid, interv%lower, interv%upper)
+    else
+      exit
+    end if
+    !if (done(schedule)) exit
+  end do
 
   !$omp end parallel
 
 end subroutine runloop
+
+
+subroutine do_work(loopid,lo,hi)
+
+  implicit none
+
+  integer, intent(in) :: loopid,lo,hi
+
+  select case (loopid)
+    case (1)
+      call loop1chunk(lo,hi)
+    case (2)
+      call loop2chunk(lo,hi)
+  end select
+
+end subroutine do_work
 
 
 subroutine loop1chunk(lo,hi)
