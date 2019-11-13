@@ -1,6 +1,8 @@
 program loops
 
-  use affinity_schedule
+  !use affinity_schedule
+  use naive_affinity_schedule
+
   use omp_lib
 
   implicit none
@@ -94,7 +96,7 @@ subroutine runloop(loopid)
   integer, intent(in) :: loopid
   integer :: myid
 
-  type(AffinitySchedule) :: schedule
+  type(NaiveAffinitySchedule) :: schedule
   type(OptionInterval) :: interv
 
   !$omp parallel default(none)  private(myid, interv) &
@@ -104,20 +106,11 @@ subroutine runloop(loopid)
 
   do
     interv = take(schedule, myid)
-    if (.not. interv%is_none) &
-      call do_work(loopid, interv%lower, interv%upper)
-    if (done(schedule, myid)) exit
-  end do
-
-  do
-    interv = take(schedule)
-    !print *, interv%is_none
     if (.not. interv%is_none) then
       call do_work(loopid, interv%lower, interv%upper)
     else
       exit
     end if
-    !if (done(schedule)) exit
   end do
 
   !$omp end parallel

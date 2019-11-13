@@ -1,173 +1,244 @@
 module priority_queue
+  !
+  ! Module containing the implementation for a fixed size
+  ! priority queue which prioritizes higher values.
+  !
+  ! The implementation is based on a heap and pairs the
+  ! keys from the heap with a lookup array for indices of
+  ! an array.
+  !
+  ! The queue is defined for positive integers excluding
+  ! zero. Elements, which key is decreased to zero are
+  ! automatically removed from the queue.
+  !
+  ! This implementation supports fast lookup of the element
+  ! with the highest priority and the element-based
+  ! decreasing of its corresponding heap key. In order to
+  ! make the element-wise decreasing operation fast it also
+  ! contains a reverse lookup array for fast access.
+  !
   implicit none
 
-  !private
+  private
 
-  type Heap
-    integer, dimension(:), allocatable :: heap
-    integer, dimension(:), allocatable :: indexes
+  type MaxPriorityQueue
+    integer, dimension(:), allocatable, private :: heap
+    integer, dimension(:), allocatable, private :: lookup
+    integer, dimension(:), allocatable, private :: reverse_lookup
     integer :: heap_size
   end type
 
+  public :: MaxPriorityQueue
+
+  public :: new_max_priority_queue
+  public :: get_max_element
+  public :: build_max_heap
+  public :: decrease_key
+  public :: set_element_unordered
+
 contains
 
-  type(Heap) function new_heap(max_size)
+  type(MaxPriorityQueue) function new_max_priority_queue(max_size)
+    !
+    ! Constructor of MaxPriorityQueue.
+    !
+    ! Takes the maximum size of the instance as argument.
+    !
     integer, intent(in) :: max_size
 
-    allocate(new_heap%heap(max_size))
-    allocate(new_heap%indexes(max_size))
-    new_heap%heap_size = 0
+    allocate(new_max_priority_queue%heap(max_size))
+    allocate(new_max_priority_queue%lookup(max_size))
+    allocate(new_max_priority_queue%reverse_lookup(max_size))
+    new_max_priority_queue%heap_size = 0
   end
 
 
-  integer function get_max_idx(self)
-    type(Heap), intent(in) :: self
-    get_max_idx = self%indexes(1)
+  subroutine set_element_unordered(self, i, key)
+    !
+    ! Sets the element of the heap at index i to key and
+    ! sets the lookup and reverse lookup arrays correspon-
+    ! dingly.
+    !
+    ! This subroutine can be used for initialization and
+    ! should otherwise be used with care.
+    !
+    type(MaxPriorityQueue), intent(inout) :: self
+    integer, intent(in) :: i, key
+
+    self%heap(i) = key
+    self%lookup(i) = i
+    self%reverse_lookup(i) = i
+  end
+
+
+  integer function get_max_element(self)
+    !
+    ! Returns the element with the highest priority.
+    !
+    type(MaxPriorityQueue), intent(in) :: self
+
+    get_max_element = self%lookup(1)
   end
 
 
   subroutine build_max_heap(self)
-    type(Heap), intent(inout) :: self
+    !
+    ! Builds the heap structure from unordered self.
+    !
+    type(MaxPriorityQueue), intent(inout) :: self
 
     integer :: i
 
     do i = self%heap_size / 2, 1, -1
-      call heap_max_heapify(self, i)
+      call max_heapify(self, i)
     end do
   end
 
 
-  subroutine decrease_key(self, idx, key)
-    type(Heap), intent(inout) :: self
-    integer, intent(in) :: idx, key
+  subroutine decrease_key(self, elem, key)
+    !
+    ! Decreases the key of the element. In order to keep
+    ! the heap property, the element may be recursively
+    ! switched with its biggest child inside the heap.
+    !
+    ! Automatically removes the element from self if the
+    ! provided key is zero.
+    !
+    type(MaxPriorityQueue), intent(inout) :: self
+    integer, intent(in) :: elem, key
 
-    integer :: i, p, l, r, old_key
+    integer :: i, max_child, l, r
 
     if (self%heap_size == 0) return
 
-    !TODO: optimize with reverse lookup array
-    i = get_heap_pos_by_idx(self, idx)
+    i = self%reverse_lookup(elem)
 
-    old_key = self%heap(i)
+    if (key == 0) then
+      call remove(self, i)
+      return
+    end if
+
     self%heap(i) = key
 
-    do while (i <= self%heap_size)
+    do
+      l = left(i)
+      r = right(i)
 
-      ! TODO: wrong approach -> don't take right, take biggest l,r
+      if (l <= self%heap_size) then
+        max_child = l
+      else
+        exit
+      end if
 
-      l = heap_left(i)
-      r = heap_right(i)
+      if (r <= self%heap_size) then
+        if (self%heap(r) > self%heap(l)) then
+          max_child = r
+        end if
+      else
+        exit
+      end if
 
-      if (r <= self%heap_size .and. self%heap(r) > self%heap(i)) then
-        call exchange(self, i, r)
-
-        i = r
-        r = heap_right(i)
-        l = heap_left(i)
-
-      elseif (l <= self%heap_size .and. self%heap(l) > self%heap(i)) then
-        call exchange(self, i, l)
-
-        i = l
-        r = heap_right(i)
-        l = heap_left(i)
-
+      if (self%heap(max_child) > self%heap(i)) then
+        call exchange(self, i, max_child)
+        i = max_child
       else
         exit
       end if
     end do
-
-    if (key == 0) then
-      self%heap(i) = self%heap(self%heap_size)
-      self%indexes(i) = self%indexes(self%heap_size)
-
-      self%heap_size = self%heap_size - 1
-
-      call heap_max_heapify(self, i)
-      return
-    end if
   end
 
 
-  recursive subroutine heap_max_heapify(heap_, i)
-    type(Heap), intent(inout) :: heap_
-    integer, intent(in) :: i
+  subroutine max_heapify(self, i_)
+    !
+    ! Builds heap property for element at index i_.
+    !
+    type(MaxPriorityQueue), intent(inout) :: self
+    integer, intent(in) :: i_
 
-    integer :: l, r
-    integer :: max_, tmp
+    integer :: i, l, r, max_
 
-    l = heap_left(i)
-    r = heap_right(i)
+    i = i_
 
-    if (l <= heap_%heap_size .and. heap_%heap(l) > heap_%heap(i)) then
-      max_ = l
-    else
-      max_ = i
-    end if
+    do
+      l = left(i)
+      r = right(i)
 
-    if (r <= heap_%heap_size .and. heap_%heap(r) > heap_%heap(max_)) then
-      max_ = r
-    end if
+      if (l <= self%heap_size .and. self%heap(l) > self%heap(i)) then
+        max_ = l
+      else
+        max_ = i
+      end if
 
-    if (max_ /= i) then
-      call exchange(heap_, i, max_)
-      call heap_max_heapify(heap_, max_)
-    end if
-  end
+      if (r <= self%heap_size .and. self%heap(r) > self%heap(max_)) then
+        max_ = r
+      end if
 
-
-  subroutine exchange(self, one, two)
-    type(Heap), intent(inout) :: self
-    integer, intent(in) :: one, two
-
-    integer :: tmp_key, tmp_idx
-
-    tmp_key = self%heap(one)
-    tmp_idx = self%indexes(one)
-
-    self%heap(one) = self%heap(two)
-    self%indexes(one) = self%indexes(two)
-
-    self%heap(two) = tmp_key
-    self%indexes(two) = tmp_idx
-  end
-
-
-  integer function get_heap_pos_by_idx(self, idx)
-    type(Heap), intent(in) :: self
-    integer, intent(in) :: idx
-
-    do get_heap_pos_by_idx = 1, self%heap_size
-      if (self%indexes(get_heap_pos_by_idx) == idx) exit
+      if (max_ /= i) then
+        call exchange(self, i, max_)
+        i = max_
+      else
+        exit
+      end if
     end do
   end
 
 
-  integer function heap_parent(i)
+  subroutine remove(self, i)
+    !
+    ! Removes element at index i from the queue.
+    !
+    type(MaxPriorityQueue), intent(inout) :: self
     integer, intent(in) :: i
 
-    heap_parent = i / 2
+    self%heap(i) = self%heap(self%heap_size)
+    self%lookup(i) = self%lookup(self%heap_size)
+
+    self%heap_size = self%heap_size - 1
+
+    call max_heapify(self, i)
   end
 
 
-  integer function heap_left(i)
-    integer, intent(in) :: i
+  subroutine exchange(self, one, two)
+    !
+    ! Changes places of elements in the heap at index one
+    ! with index two.
+    !
+    type(MaxPriorityQueue), intent(inout) :: self
+    integer, intent(in) :: one, two
 
-    heap_left = 2 * i
+    integer :: tmp_key, tmp_idx
+
+    self%reverse_lookup(self%lookup(one)) = two
+    self%reverse_lookup(self%lookup(two)) = one
+
+    tmp_key = self%heap(one)
+    tmp_idx = self%lookup(one)
+
+    self%heap(one) = self%heap(two)
+    self%lookup(one) = self%lookup(two)
+
+    self%heap(two) = tmp_key
+    self%lookup(two) = tmp_idx
   end
 
 
-  integer function heap_right(i)
+  integer function left(i)
+    !
+    ! Returns left children in heap of element at index i.
+    !
     integer, intent(in) :: i
 
-    heap_right = 2 * i + 1
+    left = 2 * i
   end
 
 
-  subroutine print_heap(self)
-    type(Heap) :: self
+  integer function right(i)
+    !
+    ! Returns right children in heap of element at index i.
+    !
+    integer, intent(in) :: i
 
-    print *, self%heap
-    print *, self%indexes, self%heap_size
+    right = 2 * i + 1
   end
 end

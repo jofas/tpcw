@@ -1,24 +1,16 @@
-module affinity_schedule
+module naive_affinity_schedule
   !
-  ! Module containing the implementation of AffinitySched-
-  ! ule, which is a schedule for OpenMP's loop directive.
+  ! See affinity_schedule.f90.
   !
-  ! It splits the iterations of a loop into #threads
-  ! approximately equal splits (like the static schedule).
-  ! Theses splits however are not processed in one chunk,
-  ! they are again splitted into smaller chunks (the chunk
-  ! size decreasing with more iterations already proces-
-  ! sed). Once a thread is finished with its split, it
-  ! takes chunks from the split that has the most
-  ! iterations yet to do, making the AffinitySchedule a
-  ! hybrid between the static and the dynamic schedule.
+  ! Implements a naive version of the AffinitySchedule. It
+  ! is naive in the sense that it uses brute force rather
+  ! than a priority queue to get the split with the highest
+  ! remaining iterations to do.
   !
-  ! The AffinitySchedule uses a priority queue underneath
-  ! to track which split has still the most iterations
-  ! left.
+  ! While brute force takes longer than accessing the
+  ! priority queue, it needs less synchronization.
   !
   use omp_lib
-  use priority_queue
 
   implicit none
 
@@ -36,17 +28,15 @@ module affinity_schedule
   end type
 
 
-  type AffinitySchedule
+  type NaiveAffinitySchedule
     type(Split), dimension(:), allocatable, private :: splits
     integer(kind=omp_lock_kind), dimension(:), allocatable, &
       private :: split_locks
-    type(MaxPriorityQueue), private :: priority_queue
-    integer(kind=omp_lock_kind), private :: priority_queue_lock
     integer :: worker_amount
   end type
 
 
-  public :: AffinitySchedule
+  public :: NaiveAffinitySchedule
   public :: OptionInterval
 
   public :: init_schedule
@@ -56,17 +46,15 @@ contains
 
   subroutine init_schedule(self, id, loop_size)
     !
-    ! Initializes the AffinitySchedule. A single thread
-    ! allocates the split instances and initializes the
-    ! priority queue, before every thread initializes his
-    ! designated split and its element in the priority
-    ! queue.
+    ! Initializes the NaiveAffinitySchedule. A single
+    ! thread allocates the split instances, before every
+    ! thread initializes his designated split.
     !
     ! Once all threads are finished, they wait before a
     ! single thread builds the heap of the priority queue.
     ! After this subroutine the priority queue is valid.
     !
-    type(AffinitySchedule), intent(inout) :: self
+    type(NaiveAffinitySchedule), intent(inout) :: self
 
     integer, intent(out) :: id
     integer, intent(in) :: loop_size
@@ -76,41 +64,17 @@ contains
 
     !$omp single
     call alloc_splits(self)
-    call init_priority_queue(self)
     !$omp end single
 
     call init_split(self, loop_size, id)
-    call set_element_unordered( &
-      self%priority_queue, id, self%splits(id)%remaining_iter &
-    )
-
-    !$omp barrier
-
-    !$omp single
-    call build_max_heap(self%priority_queue)
-    !$omp end single
   end
 
 
   subroutine alloc_splits(self)
-    type(AffinitySchedule), intent(inout) :: self
+    type(NaiveAffinitySchedule), intent(inout) :: self
 
     allocate(self%splits(self%worker_amount))
     allocate(self%split_locks(self%worker_amount))
-  end
-
-
-  subroutine init_priority_queue(self)
-    !
-    ! Get an instance of a MaxPriorityQueue and set its
-    ! heap size to #threads. Also initialize the lock for
-    ! the queue.
-    !
-    type(AffinitySchedule), intent(inout) :: self
-
-    self%priority_queue = new_max_priority_queue(self%worker_amount)
-    self%priority_queue%heap_size = self%worker_amount
-    call omp_init_lock(self%priority_queue_lock)
   end
 
 
@@ -119,7 +83,7 @@ contains
     ! Get an instance of Split. Also initialize the lock
     ! for it.
     !
-    type(AffinitySchedule), intent(inout) :: self
+    type(NaiveAffinitySchedule), intent(inout) :: self
     integer, intent(in) :: loop_size, id
 
     self%splits(id) = &
@@ -140,7 +104,7 @@ contains
     ! returned, which is then used to break the execution
     ! of the id-thread.
     !
-    type(AffinitySchedule), intent(inout) :: self
+    type(NaiveAffinitySchedule), intent(inout) :: self
     integer, intent(in) :: id
 
     integer :: remaining_iter, id_biggest
@@ -160,17 +124,26 @@ contains
       call take_(self, take, remaining_iter, id_biggest)
       call omp_unset_lock(self%split_locks(id_biggest))
     end if
-
-    call decrease_key_(self, id, remaining_iter)
   end
 
 
   integer function get_id_of_biggest_split(self)
-    type(AffinitySchedule), intent(inout) :: self
+    !
+    ! Naive brute force.
+    !
+    type(NaiveAffinitySchedule), intent(inout) :: self
 
-    call omp_set_lock(self%priority_queue_lock)
-    get_id_of_biggest_split = get_max_element(self%priority_queue)
-    call omp_unset_lock(self%priority_queue_lock)
+    integer :: max_, i
+
+    max_ = 0
+    get_id_of_biggest_split = 1
+
+    do i = 1, size(self%splits)
+      call omp_set_lock(self%split_locks(i))
+      if (self%splits(i)%remaining_iter > max_) &
+        get_id_of_biggest_split = i
+      call omp_unset_lock(self%split_locks(i))
+    end do
   end
 
 
@@ -180,7 +153,7 @@ contains
     ! the id-split. If the id-split has already finished,
     ! a invalid interval is returned.
     !
-    type(AffinitySchedule), intent(inout) :: self
+    type(NaiveAffinitySchedule), intent(inout) :: self
     type(OptionInterval), intent(out) :: take
     integer, intent(out) :: remaining_iter
     integer, intent(in) :: id
@@ -188,20 +161,6 @@ contains
     take = get_interval(self%splits(id), self%worker_amount)
 
     remaining_iter = self%splits(id)%remaining_iter
-  end
-
-
-  subroutine decrease_key_(self, id, new_key)
-    !
-    ! Decrease the key of id-element in the heap of the
-    ! priority queue to new_id.
-    !
-    type(AffinitySchedule), intent(inout) :: self
-    integer, intent(in) :: id, new_key
-
-    call omp_set_lock(self%priority_queue_lock)
-    call decrease_key(self%priority_queue, id, new_key)
-    call omp_unset_lock(self%priority_queue_lock)
   end
 
 
@@ -317,3 +276,4 @@ contains
       get_upper_boundry = loop_size
   end
 end
+

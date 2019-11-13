@@ -1,4 +1,5 @@
-FILES="priority_queue.f90 affinity_schedule.f90 loops2.f90"
+FILES="priority_queue.f90 affinity_schedule.f90 \
+  naive_affinity_schedule.f90 loops2.f90"
 
 if [ "$1" == "gfortran" ]; then
   $1 $FILES -O3 -fopenmp -o main
