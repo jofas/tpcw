@@ -1,13 +1,11 @@
 program loops
 
-  !use affinity_schedule
   use naive_affinity_schedule
 
   use omp_lib
 
   implicit none
   integer, parameter :: N=729
-  !integer, parameter :: N=400
   integer, parameter :: reps=1000
 
   real(kind=8), allocatable ::  a(:,:), b(:,:), c(:)

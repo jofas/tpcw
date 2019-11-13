@@ -1,0 +1,32 @@
+#!/bin/bash --login
+
+# PBS job options (name, compute nodes, job time)
+#PBS -N tp_out
+#PBS -l select=1
+#PBS -l walltime=03:00:00
+#PBS -A d171-s2000901
+#PBS -l place=excl
+#PBS -j oe
+
+# Change to the directory that the job was submitted from
+# (remember this should be on the /work filesystem)
+cd $PBS_O_WORKDIR
+
+function run {
+  for num_threads in 1 2 4 6 8 12 16; do
+    export OMP_NUM_THREADS=$num_threads
+
+    echo Threads: $num_threads
+
+    for i in $(seq 1 5); do
+      echo Iteration: $i
+      ./$1
+    done
+  done
+}
+
+echo Affinity Naive
+run bin/main_naive
+
+echo Affinity Queue
+run bin/main_queue
