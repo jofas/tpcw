@@ -33,7 +33,7 @@ module naive_affinity_schedule
     integer(kind=omp_lock_kind), dimension(:), allocatable, &
       private :: split_locks
     integer :: worker_amount
-    integer(kind=omp_lock_kind) :: lock_get_biggest
+    !integer(kind=omp_lock_kind) :: lock_get_biggest
   end type
 
 
@@ -65,7 +65,7 @@ contains
 
     !$omp single
     call alloc_splits(self)
-    call omp_init_lock(self%lock_get_biggest)
+    !call omp_init_lock(self%lock_get_biggest)
     !$omp end single
 
     call init_split(self, loop_size, id)
@@ -122,11 +122,11 @@ contains
     else
       call omp_unset_lock(self%split_locks(id))
 
-      call omp_set_lock(self%lock_get_biggest)
+      !call omp_set_lock(self%lock_get_biggest)
       print *, "aquire get biggest", id
       id_biggest = get_id_of_biggest_split(self)
       print *, "release get biggest", id, "got",id_biggest
-      call omp_unset_lock(self%lock_get_biggest)
+      !call omp_unset_lock(self%lock_get_biggest)
 
       call omp_set_lock(self%split_locks(id_biggest))
       call take_(self, take, remaining_iter, id_biggest)

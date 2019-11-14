@@ -35,9 +35,9 @@ program loops
 
   start2 = omp_get_wtime()
 
-  !do r = 1,reps
-  !   call runloop(2)
-  !end do
+  do r = 1,reps
+     call runloop(2)
+  end do
 
   end2  = omp_get_wtime()
 
@@ -110,10 +110,8 @@ subroutine runloop(loopid)
       exit
     end if
   end do
-  print *, "terminated", myid
-  !$omp end parallel
 
-  print *, "done with parallel section"
+  !$omp end parallel
 
 end subroutine runloop
 
