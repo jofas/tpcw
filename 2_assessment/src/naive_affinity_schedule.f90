@@ -69,6 +69,8 @@ contains
     !$omp end single
 
     call init_split(self, loop_size, id)
+
+    !$omp barrier
   end
 
 
