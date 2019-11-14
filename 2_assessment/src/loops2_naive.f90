@@ -110,7 +110,7 @@ subroutine runloop(loopid)
       exit
     end if
   end do
-
+  print *, "terminated", myid
   !$omp end parallel
 
 end subroutine runloop
