@@ -139,13 +139,14 @@ contains
     get_id_of_biggest_split = 1
 
     do i = 1, size(self%splits)
+      print *, "about to aquire", i
       call omp_set_lock(self%split_locks(i))
       print *, "aquire ", i
       if (self%splits(i)%remaining_iter > max_) then
         get_id_of_biggest_split = i
         max_ = self%splits(i)%remaining_iter
       end if
-      print *, self%splits(i)%remaining_iter, max_, get_id_of_biggest_split
+      print *, i, self%splits(i)%remaining_iter, max_, get_id_of_biggest_split
       print *, "relase ", i
       call omp_unset_lock(self%split_locks(i))
     end do
