@@ -117,8 +117,9 @@ contains
 
     else
       call omp_unset_lock(self%split_locks(id))
-
+      print *, "tryining to get biggest", id
       id_biggest = get_id_of_biggest_split(self)
+      print *, "got biggest", id, id_biggest
 
       call omp_set_lock(self%split_locks(id_biggest))
       call take_(self, take, remaining_iter, id_biggest)

@@ -26,7 +26,10 @@ function run {
 }
 
 echo Affinity Naive
-run bin/main_naive
+#run bin/main_naive
 
-echo Affinity Queue
-run bin/main_queue
+export OMP_NUM_THREADS=16
+./bin/main_naive
+
+#echo Affinity Queue
+#run bin/main_queue
