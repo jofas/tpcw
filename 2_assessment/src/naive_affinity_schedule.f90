@@ -33,7 +33,6 @@ module naive_affinity_schedule
     integer(kind=omp_lock_kind), dimension(:), allocatable, &
       private :: split_locks
     integer :: worker_amount
-    !integer(kind=omp_lock_kind) :: lock_get_biggest
   end type
 
 
@@ -51,9 +50,13 @@ contains
     ! thread allocates the split instances, before every
     ! thread initializes his designated split.
     !
-    ! Once all threads are finished, they wait before a
-    ! single thread builds the heap of the priority queue.
-    ! After this subroutine the priority queue is valid.
+    ! Once all threads are finished, they wait for all
+    ! threads to finish initialization, to avoid a race
+    ! condition. Without the barrier, one thread could
+    ! finish his split and try to access the split with
+    ! the highest remaining iterations left. If a thread
+    ! has not finished the initalization, this will result
+    ! in a segfault.
     !
     type(NaiveAffinitySchedule), intent(inout) :: self
 
@@ -65,7 +68,6 @@ contains
 
     !$omp single
     call alloc_splits(self)
-    !call omp_init_lock(self%lock_get_biggest)
     !$omp end single
 
     call init_split(self, loop_size, id)
@@ -122,11 +124,7 @@ contains
     else
       call omp_unset_lock(self%split_locks(id))
 
-      !call omp_set_lock(self%lock_get_biggest)
-      print *, "aquire get biggest", id
       id_biggest = get_id_of_biggest_split(self)
-      print *, "release get biggest", id, "got",id_biggest
-      !call omp_unset_lock(self%lock_get_biggest)
 
       call omp_set_lock(self%split_locks(id_biggest))
       call take_(self, take, remaining_iter, id_biggest)
@@ -147,15 +145,13 @@ contains
     get_id_of_biggest_split = 1
 
     do i = 1, size(self%splits)
-      print *, "about to aquire", i
       call omp_set_lock(self%split_locks(i))
-      print *, "aquire ", i
+
       if (self%splits(i)%remaining_iter > max_) then
         get_id_of_biggest_split = i
         max_ = self%splits(i)%remaining_iter
       end if
-      print *, i, self%splits(i)%remaining_iter, max_, get_id_of_biggest_split
-      print *, "relase ", i
+
       call omp_unset_lock(self%split_locks(i))
     end do
   end
