@@ -21,9 +21,9 @@ program loops
 
   start1 = omp_get_wtime()
 
-  do r = 1,reps
+  !do r = 1,reps
      call runloop(1)
-  end do
+  !end do
 
   end1  = omp_get_wtime()
 
@@ -35,9 +35,9 @@ program loops
 
   start2 = omp_get_wtime()
 
-  do r = 1,reps
-     call runloop(2)
-  end do
+  !do r = 1,reps
+  !   call runloop(2)
+  !end do
 
   end2  = omp_get_wtime()
 
