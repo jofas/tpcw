@@ -141,8 +141,11 @@ contains
 
     do i = 1, size(self%splits)
       call omp_set_lock(self%split_locks(i))
+      print *, "aquire ", i
       if (self%splits(i)%remaining_iter > max_) &
         get_id_of_biggest_split = i
+      print *, self%splits(i)%remaining_iter, max_, get_id_of_biggest_split
+      print *, "relase ", i
       call omp_unset_lock(self%split_locks(i))
     end do
   end
