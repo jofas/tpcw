@@ -1,0 +1,366 @@
+Affinity Naive
+Threads: 1
+Iteration: 1
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =    1.64737391471863     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    8.58248090744019     
+Iteration: 2
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =    1.64128899574280     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    8.57251906394958     
+Iteration: 3
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =    1.64279007911682     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    8.57823395729065     
+Iteration: 4
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =    1.64154505729675     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    8.57569694519043     
+Iteration: 5
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =    1.64401912689209     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    8.57473683357239     
+Threads: 2
+Iteration: 1
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.846242189407349     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    6.10984110832214     
+Iteration: 2
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.850358009338379     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    6.14002299308777     
+Iteration: 3
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.850848913192749     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    6.14098691940308     
+Iteration: 4
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.850461006164551     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    6.10668396949768     
+Iteration: 5
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.850025892257690     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    6.14056396484375     
+Threads: 4
+Iteration: 1
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.438585042953491     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    4.30454301834106     
+Iteration: 2
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.446966886520386     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    4.30284380912781     
+Iteration: 3
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.438180923461914     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    4.30368781089783     
+Iteration: 4
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.447724819183350     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    4.30835604667664     
+Iteration: 5
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.457290172576904     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    4.38144016265869     
+Threads: 6
+Iteration: 1
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.320554018020630     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    2.63380193710327     
+Iteration: 2
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.342540025711060     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    2.59113502502441     
+Iteration: 3
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.339974880218506     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    2.59035491943359     
+Iteration: 4
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.381291866302490     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    2.59125590324402     
+Iteration: 5
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.341855049133301     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    2.59063601493835     
+Threads: 8
+Iteration: 1
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.276355028152466     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    1.58045291900635     
+Iteration: 2
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.310930967330933     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    1.57265090942383     
+Iteration: 3
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.281260967254639     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    1.57238292694092     
+Iteration: 4
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.276406049728394     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    1.60178995132446     
+Iteration: 5
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.265215158462524     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    1.61111688613892     
+Threads: 12
+Iteration: 1
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.216408967971802     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    1.11495304107666     
+Iteration: 2
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.219552040100098     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    1.00060200691223     
+Iteration: 3
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.219088792800903     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =   0.954493045806885     
+Iteration: 4
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.232980966567993     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =   0.940890073776245     
+Iteration: 5
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.214809179306030     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    1.16593003273010     
+Threads: 16
+Iteration: 1
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.207251071929932     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    1.02772116661072     
+Iteration: 2
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.192075967788696     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =   0.898320198059082     
+Iteration: 3
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.200617074966431     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =   0.944852828979492     
+Iteration: 4
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.197798967361450     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =   0.924736022949219     
+Iteration: 5
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.191887855529785     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    1.01764512062073     
+Affinity Queue
+Threads: 1
+Iteration: 1
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =    1.64108395576477     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    8.57625818252563     
+Iteration: 2
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =    1.63691401481628     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    8.57753992080688     
+Iteration: 3
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =    1.64554500579834     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    8.58069491386414     
+Iteration: 4
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =    1.64563608169556     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    8.58026313781738     
+Iteration: 5
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =    1.64690899848938     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    8.57717919349670     
+Threads: 2
+Iteration: 1
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.850742816925049     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    6.11474514007568     
+Iteration: 2
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.854892969131470     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    6.10631108283997     
+Iteration: 3
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.852705955505371     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    6.11698198318481     
+Iteration: 4
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.839932918548584     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    6.11524820327759     
+Iteration: 5
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.834424972534180     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    6.11298489570618     
+Threads: 4
+Iteration: 1
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.501616001129150     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    4.31400299072266     
+Iteration: 2
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.493728160858154     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    4.30764293670654     
+Iteration: 3
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.493746995925903     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    4.31450510025024     
+Iteration: 4
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.484366893768311     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    4.38589692115784     
+Iteration: 5
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.507233858108521     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    4.30599188804626     
+Threads: 6
+Iteration: 1
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.327666044235229     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    2.64444017410278     
+Iteration: 2
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.318186044692993     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    2.63882112503052     
+Iteration: 3
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.321638822555542     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    2.63375592231750     
+Iteration: 4
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.313718080520630     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    2.63987207412720     
+Iteration: 5
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.331428050994873     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    2.63109803199768     
+Threads: 8
+Iteration: 1
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.276863098144531     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    1.63098096847534     
+Iteration: 2
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.296154975891113     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    1.60466694831848     
+Iteration: 3
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.295528888702393     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    1.64797997474670     
+Iteration: 4
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.296273231506348     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    1.61905908584595     
+Iteration: 5
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.299795866012573     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    1.63534903526306     
+Threads: 12
+Iteration: 1
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.277720928192139     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    1.13672184944153     
+Iteration: 2
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.279183149337769     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    1.13598108291626     
+Iteration: 3
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.253869056701660     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =   0.941801071166992     
+Iteration: 4
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.257747173309326     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =   0.941262960433960     
+Iteration: 5
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.261663913726807     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =   0.961308956146240     
+Threads: 16
+Iteration: 1
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.369837999343872     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    1.69331908226013     
+Iteration: 2
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.348207950592041     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    2.21249389648438     
+Iteration: 3
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.287353038787842     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    1.90923881530762     
+Iteration: 4
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.346977949142456     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    2.06176805496216     
+Iteration: 5
+ Loop 1 check: Sum of a is    343878.766910715     
+ Total time for         1000  reps of loop 1 =   0.353462934494019     
+ Loop 2 check: Sum of c is   -23727253.7151923     
+ Total time for         1000  reps of loop 2 =    1.87645483016968     
