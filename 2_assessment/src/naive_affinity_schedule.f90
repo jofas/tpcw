@@ -1,5 +1,7 @@
 module naive_affinity_schedule
   !
+  ! B160509
+  !
   ! See affinity_schedule.f90.
   !
   ! Implements a naive version of the AffinitySchedule. It

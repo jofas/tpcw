@@ -1,5 +1,7 @@
 module affinity_schedule
   !
+  ! B160509
+  !
   ! Module containing the implementation of AffinitySched-
   ! ule, which is a schedule for OpenMP's loop directive.
   !
