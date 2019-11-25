@@ -37,7 +37,7 @@ Project structure
   + ``affinity_schedule.f90``
 
     contains the source code for the affinity schedule (the
-    one based on the priority queue.
+    one based on the priority queue).
 
   + ``naive_affinity_schedule.f90``
 
