@@ -237,8 +237,9 @@ contains
     !
     integer, intent(in) :: remaining_iter, worker_amount
 
-    get_chunk_size = remaining_iter / worker_amount
-    if(get_chunk_size == 0) get_chunk_size = 1
+    get_chunk_size = ceiling(float(remaining_iter) &
+      / float(worker_amount))
+    !if(get_chunk_size == 0) get_chunk_size = 1
   end
 
 
