@@ -65,10 +65,11 @@ contains
     integer, intent(out) :: id
     integer, intent(in) :: loop_size
 
-    self%worker_amount = omp_get_num_threads()
     id = omp_get_thread_num() + 1
 
     !$omp single
+    self%worker_amount = omp_get_num_threads()
+
     call alloc_splits(self)
     !$omp end single
 
