@@ -44,7 +44,7 @@ module affinity_schedule
       private :: split_locks
     type(MaxPriorityQueue), private :: priority_queue
     integer(kind=omp_lock_kind), private :: priority_queue_lock
-    integer :: worker_amount
+    integer, private :: worker_amount
   end type
 
 

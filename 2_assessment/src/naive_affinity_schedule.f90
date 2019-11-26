@@ -34,7 +34,7 @@ module naive_affinity_schedule
     type(Split), dimension(:), allocatable, private :: splits
     integer(kind=omp_lock_kind), dimension(:), allocatable, &
       private :: split_locks
-    integer :: worker_amount
+    integer, private :: worker_amount
   end type
 
 
