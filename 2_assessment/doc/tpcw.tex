@@ -170,8 +170,81 @@ the \texttt{dynamic} schedule while also removing the
 idleness of threads during the execution with the
 \texttt{static} schedule.
 
-% describe the affinity schedule (what it does)
-% what aspects from other schedules
+The affinity schedule is a shared object among each thread.
+It contains the amount of OpenMP threads $p$, determined
+by \texttt{omp\_get\_num\_threads}, an array of size $p$
+containing the splits and an array of the same size
+containing OpenMP locks (integers of the kind
+\texttt{omp\_lock\_kind}).
+The locks are used for the synchronization of the access
+to a split \citep[see][Chapter 3]{omp}.
+Every OpenMP thread has a unique id $p_i$ from the sequence
+$1,2,\dots,p$ and owns the split from the split array at
+the index $p_i$.\footnote{%
+  OpenMP's \texttt{omp\_get\_thread\_num} function is used
+  for determining the id.
+  \texttt{omp\_get\_thread\_num} returns ids from the
+  sequence $0,1,\dots,p-1$. Since the id is used to access
+  splits from the splits array of the affinity schedule and
+  since Fortran arrays by default start indexing at 1, the
+  returned id by \texttt{omp\_get\_thread\_num} is
+  incremented by 1 \citep[see][Chapter 3]{omp}.}
+A split is nothing but a tuple of two non-negative
+integers. The two elements are the remaining iterations of
+the split and the index where the next chunk taken from the
+split starts.
+A chunk is a synonym for a closed interval $[i, j]$, which
+is a subset of the whole loop executed by the affinity
+schedule, which---in this case---can be thought of as the
+interval $[1, n]$.
+The thread that gets the chunk $[i, j]$ executes the loop
+from $i$ to $j$, inclusively, before taking the next chunk,
+either from its split, or, if the split is already
+finished, from the split with the most iterations left.
+
+The affinity schedule provides two methods as its
+interface, called by each thread.
+The methods are \texttt{init} and \texttt{take}.
+\texttt{init} initializes everything and returns the id
+to every thread.
+It sets $p$, allocates the split and the lock array and
+initializes the content of both.
+While allocation and the setting of $p$ are done by a
+single thread, the initialization of the splits and locks
+are done by every thread concurrently.
+That means, the thread with id $p_i$ initializes the split
+in the split array at index $p_i$.
+The same is done with the lock in the lock array, simply
+by calling \texttt{omp\_init\_lock}
+\citep[see][Chapter 3]{omp}.
+Every thread must leave \texttt{init}, only after all
+threads have finished initializing their split and lock.
+Otherwise, if a very fast thread has already finished his
+split, while other threads are still not finished with
+initializing, the already finished thread could possibly
+access an uninitialized split, which would result in a
+segmentation fault.
+Therefore, at the end of \texttt{init}, all threads are
+synchronized with a \texttt{barrier}
+\citep[see][Chapter 2]{omp}.
+
+TODO: take
+% interface schedule, intricacies
+
+This paper describes two different versions of the affinity
+schedule.
+The versions differ in their strategy for determining the
+split, which has the most iterations still to do.
+The two versions are called \texttt{naive} and
+\texttt{queue}.
+The \texttt{naive} affinity schedule simply uses brute
+force, iterating every split and find the one with the most
+iterations left, while the \texttt{queue} affinity schedule
+uses a priority queue based on the max-heap data structure,
+which is constantly updated, every time a chunk is taken
+from the split \citep[for the max-heap data structure see
+e.g.][Chapter 6]{cormen}.
+
 
 % describe the two different versions
 % first naive then queue
