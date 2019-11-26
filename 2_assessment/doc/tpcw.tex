@@ -110,6 +110,78 @@ drawn.
 
 \section{Method} % {{{
 
+Like stated in the previous chapter, the affinity schedule
+combines properties from the already built-in schedules
+\texttt{static}, \texttt{dynamic} and \texttt{guided}.
+Let $n$ be the amount of iterations of the loop the
+instance of the affinity schedule is applied to and let $p$
+be the amount of OpenMP threads.
+The affinity schedule splits the $n$ iterations of the
+loop into $p$ splits, all having approximately
+$\frac{n}{p}$ iterations.
+This is the same way the \texttt{static} schedule splits
+the iterations, if no chunk size is provided
+\citep[see][Chapter 2]{omp}.
+
+Every split is owned by one OpenMP thread. But, unlike the
+\texttt{static} schedule, the split is not executed as a
+whole.
+Rather, it is split again into smaller chunks, which are
+executed after another.
+The size of the chunks gets smaller, the more iterations
+of the split are already executed:
+\begin{align*}
+  chunk\ size := \lceil remaining\ iterations \cdot p^{-1} \rceil.
+\end{align*}
+
+The decreasing chunk sizes are a property of the
+\texttt{guided} schedule.
+While the \texttt{guided} schedule takes all $n$ iterations
+and dynamically assigns the splits in a first come first
+serve order to the OpenMP threads (like the
+\texttt{dynamic} schedule), the affinity schedule
+uses the same property of decreasing chunk size, just local
+to each split \citep[see][Chapter 2]{omp}.
+
+Once a thread has finished all chunks of the split it owns,
+it is not simply idle until all threads have finished their
+splits.
+Instead, the thread determines the split that has still the
+most iterations left and takes the next chunk from it.
+Therefore, once the owned split of a thread is finished,
+the thread changes from behaving like it is part of the
+\texttt{guided} scheduling strategy on the local split to
+being \texttt{dynamic} in the fact that the split with the
+most iterations left is dynamically executed by all threads
+that have finished their split, plus the owner thread.
+
+The affinity schedule therefore combines the strengths,
+concerning the execution speed, of the aforementioned
+built-in schedules over the phases of its execution.
+It starts executing like the \texttt{static} schedule,
+which produces very low overhead of synchronization (in
+fact none, but the affinity schedule must synchronize
+access to the split), moving over to a \texttt{dynamic}
+scheduling strategy,
+which has a higher overhead of synchronization, but
+produces no idle threads.
+This effectively reduces the synchronization overhead of
+the \texttt{dynamic} schedule while also removing the
+idleness of threads during the execution with the
+\texttt{static} schedule.
+
+% describe the affinity schedule (what it does)
+% what aspects from other schedules
+
+% describe the two different versions
+% first naive then queue
+
+% pseudo code
+% graph ?? Probably not
+
+% describe benchmark
+%
+
 % }}}
 
 \section{Results} % {{{
