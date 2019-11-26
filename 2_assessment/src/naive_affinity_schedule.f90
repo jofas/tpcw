@@ -239,7 +239,6 @@ contains
 
     get_chunk_size = ceiling(float(remaining_iter) &
       / float(worker_amount))
-    !if(get_chunk_size == 0) get_chunk_size = 1
   end
 
 
