@@ -1,0 +1,129 @@
+\documentclass[twoside,11pt]{article}
+\PassOptionsToPackage{hyphens}{url}
+\usepackage{jmlr2e}
+\usepackage{amsmath}
+\usepackage[toc,page]{appendix}
+\usepackage[table]{xcolor}
+\usepackage[marginparsep=30pt]{geometry}
+\usepackage{stmaryrd}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\usepackage{tabu}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{listings}
+\usepackage{fancyref}
+\usepackage{relsize}
+\usepackage{float}
+\usepackage{subcaption}
+\usepackage{diagbox}
+
+\usetikzlibrary{%
+    arrows,
+    arrows.meta,
+    decorations,
+    backgrounds,
+    positioning,
+    fit,
+    petri,
+    shadows,
+    datavisualization.formats.functions,
+    calc,
+    shapes,
+    shapes.multipart,
+    matrix,
+    plotmarks
+}
+
+\usepgfplotslibrary{fillbetween, statistics}
+
+\pgfplotsset{
+  compat=1.3,
+  every non boxed x axis/.style={
+  enlarge x limits=false,
+  x axis line style={}%-stealth},
+  },
+  every boxed x axis/.style={},
+  every non boxed y axis/.style={
+  enlarge y limits=false,
+  y axis line style={}%-stealth},
+  },
+  every boxed y axis/.style={},
+}
+
+\def\titl{Threaded Programming coursework II: the affinity
+  schedule for scheduling the OpenMP loop construct}
+
+\title{\titl}
+
+\author{}
+
+\ShortHeadings{B160509}{B160509}
+\firstpageno{1}
+
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+\end{abstract}
+
+\begin{keywords}
+Scientific programming, parallelization,
+performance optimization, OpenMP
+\end{keywords}
+
+\section{Introduction} % {{{
+
+OpenMP version 4.5 supports various scheduling options for
+its loop construct, for example \texttt{static},
+\texttt{dynamic} or \texttt{guided}
+\citep[see][Chapter 2]{omp}.
+This paper presents an alternative schedule, called the
+affinity schedule.
+The affinity schedule combines some properties of the three
+above mentioned scheduling options into one schedule.
+
+This paper is a follow-up of a benchmark presented in
+\citet{b1}.
+\citet{b1} presents a scientific program written in the
+Fortran programming language, containing two loops
+performing matrix and vector operations.
+These two loops were parallelized using built-in scheduling
+options of OpenMP version 4.5 and then benchmarked in order
+to determine the best schedule for the two loops.
+The here presented affinity schedule is benchmarked the
+same way, as are the built-in schedules in \citet{b1}.
+
+This paper begins by describing two versions of the
+affinity schedule. Afterwards the benchmark is described
+and its results are presented. The benchmark of the
+affinity schedule is then compared to the best schedule for
+both loops determined in \citet{b1}.
+At last the results are discussed and a conclusion is
+drawn.
+
+% }}}
+
+\section{Method} % {{{
+
+% }}}
+
+\section{Results} % {{{
+
+% }}}
+
+\section{Discussion} % {{{
+
+% }}}
+
+\section{Conclusion} % {{{
+
+% }}}
+
+\bibliography{tpcw.bib}
+
+\end{document}
