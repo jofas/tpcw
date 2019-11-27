@@ -463,6 +463,239 @@ determined by the benchmark from \citet{b1}.
 
 \section{Results} % {{{
 
+\begin{figure} % actual speed {{{
+
+\begin{subfigure}{\linewidth} % {{{
+  \begin{center}
+    \begin{tikzpicture}[scale=1.75] %{{{
+  \datavisualization[
+    scientific axes=clean,
+    visualize as line/.list={d, d2, d3},
+    style sheet=vary dashing,
+    style sheet=strong colors,
+    style sheet=cross marks,
+    d={
+      label in legend={text={\texttt{naive}} },
+    },
+    d2={
+      label in legend={text={\texttt{queue}} },
+    },
+    d3={
+      label in legend={text={\texttt{dynamic, 16}} },
+    },
+    y axis={
+      %ticks={major={at={1,2,4,8,16}} },
+      label={average time in seconds},
+    },
+    x axis={
+      logarithmic,
+      ticks={major={at={1,2,4,8,16}} },
+      label={amount of threads $t$ (\textit{log} scale)},
+      grid={minor={at={2,4,8} }},
+    },
+  ]
+  data[headline={x, y}, read from file=data/time_naive_1.csv, set=d]
+  data[headline={x, y}, read from file=data/time_queue_1.csv, set=d2]
+  data[headline={x, y}, set=d3] {
+    1,  1.87
+    2,  0.94
+    4,  0.48
+    6,  0.34
+    8,  0.26
+    12, 0.19
+    16, 0.15
+  }
+  ;
+    \end{tikzpicture} % }}}
+  \end{center}
+  \caption{Loop 1.}
+  \label{subfig:time_loop1}
+  \vspace{1cm}
+\end{subfigure} % }}}
+
+\begin{subfigure}{\linewidth} % {{{
+  \begin{center}
+    \begin{tikzpicture}[scale=1.75] %{{{
+  \datavisualization[
+    scientific axes={clean},
+    visualize as line/.list={d, d2, d3},
+    style sheet=vary dashing,
+    style sheet=strong colors,
+    style sheet=cross marks,
+    d={
+      label in legend={text={\texttt{naive}} },
+    },
+    d2={
+      label in legend={text={\texttt{queue}} },
+    },
+    d3={
+      label in legend={text={\texttt{dynamic, 8}} },
+    },
+    y axis={
+      %ticks={major={at={1,2,4,8,16}} },
+      label={average time in seconds},
+    },
+    x axis={
+      logarithmic,
+      ticks={major={at={1,2,4,8,16}} },
+      label={amount of threads $t$ (\textit{log} scale)},
+      grid={minor={at={2,4,8} }},
+    },
+  ]
+  data[headline={x, y}, read from file=data/time_naive_2.csv, set=d]
+  data[headline={x, y}, read from file=data/time_queue_2.csv, set=d2]
+  data[headline={x, y}, set=d3] {
+    1,  8.59
+    2,  4.30
+    4,  2.22
+    6,  2.08
+    8,  2.10
+    12, 2.08
+    16, 2.07
+  }
+  ;
+    \end{tikzpicture} % }}}
+  \end{center}
+  \caption{Loop 2.}
+  \label{subfig:time_loop2}
+  \vspace{1cm}
+\end{subfigure} % }}}
+
+\caption{Average execution time in seconds, taken per
+  tested amount of threads.}
+\label{fig:time}
+\end{figure} % }}}
+
+\begin{figure} % speedup {{{
+
+\begin{subfigure}{\linewidth} % {{{
+  \begin{center}
+    \begin{tikzpicture}[scale=1.75] %{{{
+  \datavisualization[
+    scientific axes=clean,
+    visualize as line/.list={d1, d, d2, d3},
+    style sheet=vary dashing,
+    style sheet=strong colors,
+    style sheet=cross marks,
+    d1={
+      label in legend={text={optimal}}
+    },
+    d={
+      label in legend={text={\texttt{naive}} },
+    },
+    d2={
+      label in legend={text={\texttt{queue}} },
+    },
+    d3={
+      label in legend={text={\texttt{dynamic, 16}} },
+    },
+    y axis={
+      logarithmic,
+      ticks={major={at={1,2,4,8,16}} },
+      label={speedup $\frac{\emptyset time_{t_1}}{\emptyset time_{t}}$ (\textit{log} scale)}
+    },
+    x axis={
+      logarithmic,
+      ticks={major={at={1,2,4,8,16}} },
+      label={amount of threads $t$ (\textit{log} scale)},
+      grid={minor={at={2,4,8} }},
+    },
+  ]
+  data[headline={x, y}, read from file=data/speedup_naive_1.csv, set=d]
+  data[headline={x, y}, read from file=data/speedup_queue_1.csv, set=d2]
+  data[headline={x, y}, set=d3] {
+    1,  1
+    2,  1.99
+    4,  3.90
+    6,  5.50
+    8,  7.19
+    12, 9.84
+    16, 12.47
+  }
+  data[headline={x, y}, set=d1] {
+    1, 1
+    2, 2
+    4, 4
+    6, 6
+    8, 8
+    12, 12
+    16, 16
+  }
+  ;
+    \end{tikzpicture} % }}}
+  \end{center}
+  \caption{Loop 1.}
+  \label{subfig:speedup_loop1}
+  \vspace{1cm}
+\end{subfigure} % }}}
+
+\begin{subfigure}{\linewidth} % {{{
+  \begin{center}
+    \begin{tikzpicture}[scale=1.75] %{{{
+  \datavisualization[
+    scientific axes={clean},
+    visualize as line/.list={d1, d, d2, d3},
+    style sheet=vary dashing,
+    style sheet=strong colors,
+    style sheet=cross marks,
+    d1={
+      label in legend={text={optimal}}
+    },
+    d={
+      label in legend={text={\texttt{naive}} },
+    },
+    d2={
+      label in legend={text={\texttt{queue}} },
+    },
+    d3={
+      label in legend={text={\texttt{dynamic, 8}} },
+    },
+    y axis={
+      logarithmic,
+      ticks={major={at={1,2,4,8,16}} },
+      label={speedup $\frac{\emptyset time_{t_1}}{\emptyset time_{t}}$ (\textit{log} scale)}
+    },
+    x axis={
+      logarithmic,
+      ticks={major={at={1,2,4,8,16}} },
+      label={amount of threads $t$ (\textit{log} scale)},
+      grid={minor={at={2,4,8} }},
+    },
+  ]
+  data[headline={x, y}, read from file=data/speedup_naive_2.csv, set=d]
+  data[headline={x, y}, read from file=data/speedup_queue_2.csv, set=d2]
+  data[headline={x, y}, set=d3] {
+    1,  1
+    2,  2.0
+    4,  3.87
+    6,  4.13
+    8,  4.11
+    12, 4.13
+    16, 4.15
+  }
+  data[headline={x, y}, set=d1] {
+    1, 1
+    2, 2
+    4, 4
+    6, 6
+    8, 8
+    12, 12
+    16, 16
+  }
+  ;
+    \end{tikzpicture} % }}}
+  \end{center}
+  \caption{Loop 2.}
+  \label{subfig:speedup_loop2}
+  \vspace{1cm}
+\end{subfigure} % }}}
+
+\caption{Speedup when using more threads. The speedup
+  was calculated over the average of every measurement,
+  grouped by the amount of threads.}
+\label{fig:speedup}
+\end{figure} % }}}
+
 % }}}
 
 \section{Discussion} % {{{
