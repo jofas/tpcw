@@ -85,7 +85,9 @@ its loop construct, for example \texttt{static},
 This paper presents an alternative schedule, called the
 affinity schedule.
 The affinity schedule combines some properties of the three
-above mentioned scheduling options into one schedule.
+above mentioned scheduling options into one schedule,
+trying to combine the strengths of the schedules and
+canceling out their weaknesses.
 
 This paper is a follow-up of a benchmark presented in
 \citet{b1}.
@@ -145,7 +147,7 @@ to each split \citep[see][Chapter 2]{omp}.
 
 Once a thread has finished all chunks of the split it owns,
 it is not simply idle until all threads have finished their
-splits.
+splits (a weakness of the \texttt{static} schedule).
 Instead, the thread determines the split that has still the
 most iterations left and takes the next chunk from it.
 Therefore, once the owned split of a thread is finished,
@@ -153,7 +155,10 @@ the thread changes from behaving like it is part of the
 \texttt{guided} scheduling strategy on the local split to
 being \texttt{dynamic} in the fact that the split with the
 most iterations left is dynamically executed by all threads
-that have finished their split, plus the owner thread.
+that have finished their split, plus the owner thread,
+freeing the owner thread to become \texttt{dynamic} as
+well.
+This is continued until all splits are executed.
 
 The affinity schedule therefore combines the strengths,
 concerning the execution speed, of the aforementioned
@@ -178,6 +183,7 @@ containing OpenMP locks (integers of the kind
 \texttt{omp\_lock\_kind}).
 The locks are used for the synchronization of the access
 to a split \citep[see][Chapter 3]{omp}.
+
 Every OpenMP thread has a unique id $p_i$ from the sequence
 $1,2,\dots,p$ and owns the split from the split array at
 the index $p_i$.\footnote{%
@@ -210,7 +216,9 @@ to every thread.
 It sets $p$, allocates the split and the lock array and
 initializes the content of both.
 While allocation and the setting of $p$ are done by a
-single thread, the initialization of the splits and locks
+single thread\footnote{the \texttt{single} construct is
+  used for this \citep[see][Chapter 2]{omp}.},
+the initialization of the splits and locks
 are done by every thread concurrently.
 That means, the thread with id $p_i$ initializes the split
 in the split array at index $p_i$.
@@ -228,8 +236,44 @@ Therefore, at the end of \texttt{init}, all threads are
 synchronized with a \texttt{barrier}
 \citep[see][Chapter 2]{omp}.
 
-TODO: take
-% interface schedule, intricacies
+After a thread leaves \texttt{init}, it starts executing
+chunks.
+The thread does not know or care, where the chunks are
+coming from, as long as they are valid.
+It has no concept of owning a split.
+The ownership relationship is only implemented in the
+affinity schedule and a thread is reduced to its id and
+the basic task of executing chunks.
+
+In order for a thread to get the next chunk for execution,
+it calls the \texttt{take} method of the affinity schedule
+instance.
+\texttt{take} takes the id of the thread as an argument.
+It first looks at the split owned by the calling thread.
+If it has already finished, it instead tries to get a
+chunk of the split with the most iterations left.
+Before accessing any split, the corresponding lock in the
+lock array must be set with \texttt{omp\_set\_lock}, so
+the current thread has exclusive access to the split and
+race conditions are avoided.
+After a split is accessed, the lock is unset with
+\texttt{omp\_unset\_lock} \citep[see][Chapter 3]{omp}.
+
+The result of \texttt{take}, on an abstract level, can be
+thought of as an instance of an algebraic sum type, which
+returns either a valid interval or nothing
+\citep[for sum types see e.g.][]{sum_types}.\footnote{%
+  In languages like Rust and Swift this type is called the
+  \texttt{Option} type \citep[see][]{rust, swift}.
+  Fortran unfortunately does not support sum types. So
+  the actual implementation is a wrapper around an interval
+  with a boolean field indicating, whether the returned
+  interval is valid or not.}
+If nothing is returned (in this case the boolean field
+\texttt{is\_none} would be true), then all splits have
+finished and the thread can stop its execution.
+Otherwise it executes the returned interval and calls
+\texttt{take} again, until it returns nothing.
 
 This paper describes two different versions of the affinity
 schedule.
@@ -244,16 +288,83 @@ uses a priority queue based on the max-heap data structure,
 which is constantly updated, every time a chunk is taken
 from the split \citep[for the max-heap data structure see
 e.g.][Chapter 6]{cormen}.
+Both implementations have weaknesses.
+While the \texttt{naive} version is, in theory slow,
+because the lookup requires the calling thread to iterate
+all splits, the priority queue used by the \texttt{queue}
+affinity schedule is not thread-safe and therefore requires
+a lot of synchronization, which reduces its in theory
+faster lookup of the split with the most iterations left.
+For this reason, the access to the priority queue must be
+locked with an additional lock, so only
+a single thread can access the priority queue at any given
+moment.
+The performance of both versions is compared in the
+following chapters.
 
+The priority queue provides two main methods as its
+interface (and some more minor methods for constructing
+it), \texttt{max\_element} and \texttt{decrease\_key}.
+It consists of three arrays, all the size of $p$.
+One array is the heap, containing the remaining iterations
+of each split \citep[see][Chapter 6]{cormen}.
+The second array---the lookup array---contains the index of
+the split, corresponding to its key in the heap.
+For example, if the split owned by the thread $p_3$ is the
+split with the most remaining iterations of 15, the first
+element of the heap would be 15 and the first element of
+the lookup array would be 3.
+The lookup array is for fast access to the split that has
+the most iterations left.
+The \texttt{max\_element} method simply returns the first
+element of the lookup array.
 
-% describe the two different versions
-% first naive then queue
+After a thread takes a chunk from a split, the remaining
+iterations of the split are decreased.
+The decreased key must be updated in the priority queue.
+The third array of the priority queue is the reverse
+lookup array for fast access during the
+\texttt{decrease\_key} operations.
+Lets continue the example from above: a thread takes the
+next chunk of size 3 from the split owned by $p_3$,
+respectively decreasing the remaining iterations of that
+split to 12.
+\texttt{decrease\_key} takes $p_3$ and 12 as its arguments.
+Now, in order to find the heap element which corresponds
+to $p_3$, we could iterate over the elements of the
+lookup array until we find the element that is equal to
+$p_3$.
+This is not very elegant or efficient, so the priority
+queue maintains the reverse lookup array.
+So, instead of iterating over the lookup arrays, instead
+the reverse lookup array at $p_3$ returns the position of
+$p_3$ in the heap, in this example 1.
+Afterwards the $15$ in the heap at index 1 is decreased to
+12 and the heap property is restored (if 12 is smaller than
+any of its children, they are recursively swapped until no
+children are bigger than 12).
+Finished splits (where remaining iterations are zero),
+are automatically removed from the heap.
 
 % pseudo code
-% graph ?? Probably not
 
-% describe benchmark
-%
+The benchmark presented in the following chapters is the
+same as the second part of the benchmark presented in
+\citet{b1}.
+The two loops of the scientific program are executed by
+affinity schedule instances on a back end node of the
+Cirrus supercomputer with exclusive access
+\citep[see][]{cirrus}.
+The program is run with 1, 2, 4, 6, 8, 12 and 16 OpenMP
+threads, five times per amount of threads.
+The timing of the execution is done with the
+\texttt{omp\_get\_wtime} routine
+\citep[see][Chapter 3]{omp}.
+
+Both versions of the affinity schedule are tested. They
+are compared against each other and the results of the best
+built-in schedules for the two loops of the program,
+determined by the benchmark from \citet{b1}.
 
 % }}}
 
