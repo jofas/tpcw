@@ -208,6 +208,25 @@ from $i$ to $j$, inclusively, before taking the next chunk,
 either from its split, or, if the split is already
 finished, from the split with the most iterations left.
 
+\begin{algorithm}
+  \caption{: executing a loop with the affinity schedule}
+  \label{alg:main}
+
+  \begin{algorithmic}[1]
+    \STATE{start OpenMP parallel region with schedule being shared}
+    \STATE{initialize schedule with \texttt{init}}
+    \WHILE{$true$}
+      \STATE{get interval from \texttt{take}(schedule, $p_i$)}
+      \IF {the interval is valid}
+        \STATE{execute subset of loop defined by the interval}
+      \ELSE
+        \STATE{exit while loop}
+      \ENDIF
+    \ENDWHILE
+    \STATE{end OpenMP parallel region}
+  \end{algorithmic}
+\end{algorithm}
+
 The affinity schedule provides two methods as its
 interface, called by each thread.
 The methods are \texttt{init} and \texttt{take}.
@@ -235,6 +254,28 @@ segmentation fault.
 Therefore, at the end of \texttt{init}, all threads are
 synchronized with a \texttt{barrier}
 \citep[see][Chapter 2]{omp}.
+Algorithm~\ref{alg:init} shows the \texttt{init} method.
+
+\begin{algorithm}
+  \caption{: \texttt{init}}
+  \label{alg:init}
+
+  \begin{algorithmic}[1]
+    \STATE{set the $p_i$ of the calling thread to
+      \texttt{omp\_get\_thread\_num} + 1}
+    \STATE{enter OpenMP \texttt{single} block}
+    \STATE{set $p$ with \texttt{omp\_get\_num\_threads}}
+    \STATE{allocate the arrays for the splits and for the locks}
+    \STATE{leave OpenMP \texttt{single} block}
+    \STATE{initialize split and lock in the arrays at the index
+      $p_i$}
+    \IF{the schedule is a \texttt{queue} affinity schedule}
+      \STATE{initialize the priority queue and its lock as well}
+    \ENDIF
+    \STATE{wait here till all threads have finished (realized
+      with the OpenMP \texttt{barrier} structure)}
+  \end{algorithmic}
+\end{algorithm}
 
 After a thread leaves \texttt{init}, it starts executing
 chunks.
@@ -244,6 +285,8 @@ It has no concept of owning a split.
 The ownership relationship is only implemented in the
 affinity schedule and a thread is reduced to its id and
 the basic task of executing chunks.
+Algorithm~\ref{alg:main} shows how the threads execute
+when the affinity schedule is used.
 
 In order for a thread to get the next chunk for execution,
 it calls the \texttt{take} method of the affinity schedule
@@ -271,9 +314,36 @@ returns either a valid interval or nothing
   interval is valid or not.}
 If nothing is returned (in this case the boolean field
 \texttt{is\_none} would be true), then all splits have
-finished and the thread can stop its execution.
+finished and the thread can stop its execution
+(see Algorithm~\ref{alg:main}, lines 5ff).
 Otherwise it executes the returned interval and calls
-\texttt{take} again, until it returns nothing.
+\texttt{take} again, until it returns nothing
+(see Algorithm~\ref{alg:main}, line 4).
+Algorithm~\ref{alg:take} displays \texttt{take}.
+
+\begin{algorithm}
+  \caption{: \texttt{take}}
+  \label{alg:take}
+
+  \begin{algorithmic}[1]
+    \STATE{set the lock in the lock array at index $p_i$}
+    \IF{the split in the split array at index $p_i$ is
+        \textbf{not} finished}
+      \STATE{take chunk from the split at index $p_i$}
+      \STATE{unset the lock at index $p_i$}
+    \ELSE
+      \STATE{unset the lock at index $p_i$}
+      \STATE{get id of the thread owning the split with the
+        most iterations left $p_{most}$ (either
+        \texttt{naive} or with the \texttt{queue})}
+      \STATE{set the lock in the lock array at index $p_{most}$}
+      \STATE{take chunk from the split at index $p_{most}$}
+      \STATE{unset the lock at index $p_{most}$}
+    \ENDIF
+    \RETURN{the taken chunk (can be nothing if the split
+      with the most remaining iterations is finished)}
+  \end{algorithmic}
+\end{algorithm}
 
 This paper describes two different versions of the affinity
 schedule.
@@ -288,6 +358,7 @@ uses a priority queue based on the max-heap data structure,
 which is constantly updated, every time a chunk is taken
 from the split \citep[for the max-heap data structure see
 e.g.][Chapter 6]{cormen}.
+
 Both implementations have weaknesses.
 While the \texttt{naive} version is, in theory slow,
 because the lookup requires the calling thread to iterate
@@ -338,15 +409,37 @@ This is not very elegant or efficient, so the priority
 queue maintains the reverse lookup array.
 So, instead of iterating over the lookup arrays, instead
 the reverse lookup array at $p_3$ returns the position of
-$p_3$ in the heap, in this example 1.
+$p_3$ in the heap, in this example 1 (see
+Algorithm~\ref{alg:dk}, line 1).
 Afterwards the $15$ in the heap at index 1 is decreased to
 12 and the heap property is restored (if 12 is smaller than
 any of its children, they are recursively swapped until no
-children are bigger than 12).
+children are bigger than 12 (see Algorithm~\ref{alg:dk},
+lines 8ff)).
 Finished splits (where remaining iterations are zero),
-are automatically removed from the heap.
+are automatically removed from the heap (see
+Algorithm~\ref{alg:dk}, lines 2ff).
 
-% pseudo code
+\begin{algorithm}
+  \caption{: \texttt{decrease\_key}($p_i$, $key$)}
+  \label{alg:dk}
+
+  \begin{algorithmic}[1]
+    \STATE{get heap and lookup index $i$ from the reverse
+      lookup array at index $p_i$}
+    \IF{$key = 0$}
+      \STATE{swap places with the last element of the heap}
+      \STATE{decrease the heap size}
+      \STATE{restore heap property \citep[see][Chapter 6]{cormen}}
+    \ELSE
+      \STATE{decrease value in heap at index $i$ to $key$}
+      \WHILE{the decreased element has children that are
+          greater}
+        \STATE{swap the element with its biggest child}
+      \ENDWHILE
+    \ENDIF
+  \end{algorithmic}
+\end{algorithm}
 
 The benchmark presented in the following chapters is the
 same as the second part of the benchmark presented in
