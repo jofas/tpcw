@@ -84,9 +84,9 @@ Afterwards they are benchmarked and compared against well
 performing built-in schedules determined in \citet{b1}.
 
 While the two versions of the affinity schedule perform
-well for the most parts and sometimes even outperforming
+well for the most parts and sometimes even outperform
 the built-in schedules, this paper comes to the conclusion
-that the affinity schedule simply is too complex and
+that the affinity schedule is simply too complex and
 contains too much synchronization, which hurts its
 scalability.
 An idea for a better performing affinity schedule is
@@ -108,7 +108,7 @@ This paper presents an alternative schedule, called the
 affinity schedule.
 The affinity schedule combines some properties of the three
 above mentioned scheduling options into one schedule,
-trying to combine the strengths of the schedules and
+trying to combine the strengths of these schedules and
 canceling out their weaknesses.
 
 This paper is a follow-up of a benchmark presented in
@@ -189,14 +189,19 @@ built-in schedules over the phases of its execution.
 It starts executing like the \texttt{static} schedule,
 which produces very low overhead of synchronization (in
 fact none, but the affinity schedule must synchronize
-access to the split), moving over to a \texttt{dynamic}
+access to the splits), moving over to a \texttt{dynamic}
 scheduling strategy,
 which has a higher overhead of synchronization, but
 produces no idle threads.
-This effectively reduces the synchronization overhead of
-the \texttt{dynamic} schedule while also removing the
+This should effectively reduce the synchronization overhead
+of the \texttt{dynamic} schedule while also removing the
 idleness of threads during the execution with the
 \texttt{static} schedule.
+In the following chapters, this property is discussed.
+Determining the split with the most iterations left is no
+trivial task and involves a lot of synchronization, at
+least in the versions of the affinity schedule here
+presented.
 
 The affinity schedule is a shared object among each thread.
 It contains the amount of OpenMP threads $p$, determined
@@ -214,9 +219,9 @@ the index $p_i$.\footnote{%
   for determining the id.
   \texttt{omp\_get\_thread\_num} returns ids from the
   sequence $0,1,\dots,p-1$. Since the id is used to access
-  splits from the splits array of the affinity schedule and
-  since Fortran arrays by default start indexing at 1, the
-  returned id by \texttt{omp\_get\_thread\_num} is
+  splits and locks from the arrays of the affinity schedule
+  and since Fortran arrays by default start indexing at 1,
+  the returned id by \texttt{omp\_get\_thread\_num} is
   incremented by 1 \citep[see][Chapter 3]{omp}.}
 A split is nothing but a tuple of two non-negative
 integers. The two elements are the remaining iterations of
@@ -430,9 +435,9 @@ lookup array until we find the element that is equal to
 $p_3$.
 This is not very elegant or efficient, so the priority
 queue maintains the reverse lookup array.
-So, instead of iterating over the lookup arrays, instead
-the reverse lookup array at $p_3$ returns the position of
-$p_3$ in the heap, in this example 1 (see
+So, instead of iterating over the lookup array, instead
+the reverse lookup array at index $p_3$ returns the
+position of $p_3$ in the heap, in this example 1 (see
 Algorithm~\ref{alg:dk}, line 1).
 Afterwards the $15$ in the heap at index 1 is decreased to
 12 and the heap property is restored (if 12 is smaller than
@@ -776,7 +781,7 @@ threads, while the affinity schedules outperform it with
 \label{fig:speedup}
 \end{figure} % }}}
 
-Figure~\ref{fig:time} shows the performance of the
+While Figure~\ref{fig:time} shows the performance of the
 schedules, Figure~\ref{fig:speedup} shows their scaling
 capabilities by displaying the speedup of each schedule
 when using more threads.
@@ -824,7 +829,7 @@ chunk size than 8 would scale better for the second loop,
 because the tested affinity schedules provide a lower
 chunk size for the most parts.
 
-Overall the usefulness of the affinity schedule is
+Overall is the usefulness of the affinity schedule
 questionable, because more inner state must be maintained
 (the shared splits instead of just the loop) and more
 synchronization must be performed---once a thread has
