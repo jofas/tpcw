@@ -69,6 +69,28 @@
 \maketitle
 
 \begin{abstract}
+This paper describes an alternative schedule for scheduling
+OpenMP's loop construct, the affinity schedule.
+The affinity schedule tries to add positive properties of
+different built-in schedules together into one schedule.
+This paper is a follow-up on a benchmark presented in
+\citet{b1}.
+
+Two versions of the affinity schedule are presented and
+compared against each other.
+This paper describes in detail how the two versions of the
+affinity schedule are implemented.
+Afterwards they are benchmarked and compared against well
+performing built-in schedules determined in \citet{b1}.
+
+While the two versions of the affinity schedule perform
+well for the most parts and sometimes even outperforming
+the built-in schedules, this paper comes to the conclusion
+that the affinity schedule simply is too complex and
+contains too much synchronization, which hurts its
+scalability.
+An idea for a better performing affinity schedule is
+presented.
 \end{abstract}
 
 \begin{keywords}
@@ -111,6 +133,7 @@ drawn.
 % }}}
 
 \section{Method} % {{{
+\label{sec:method}
 
 Like stated in the previous chapter, the affinity schedule
 combines properties from the already built-in schedules
@@ -235,7 +258,7 @@ to every thread.
 It sets $p$, allocates the split and the lock array and
 initializes the content of both.
 While allocation and the setting of $p$ are done by a
-single thread\footnote{the \texttt{single} construct is
+single thread\footnote{The \texttt{single} construct is
   used for this \citep[see][Chapter 2]{omp}.},
 the initialization of the splits and locks
 are done by every thread concurrently.
@@ -566,6 +589,63 @@ determined by the benchmark from \citet{b1}.
 \label{fig:time}
 \end{figure} % }}}
 
+The results here presented are grouped by each of the two
+parallelized loops of the benchmarked scientific program.
+The loops are thoroughly described and analyzed in
+\citet{b1}.
+Both loops are asymmetric when it comes to the distribution
+of the computational complexity.
+Both loops are more complex at the beginning, which means
+chunks closer to 1 take longer to finish then chunks closer
+to $n$. $n = 729$ for the benchmark \citep[see][]{b1}.
+While for the first loop complexity decreases linearly,
+for the second loop the complexity at the beginning is much
+higher and decreases more extreme \citep[see][]{b1}.
+
+Figure~\ref{subfig:time_loop1} shows the average execution
+time for both affinity schedule versions and the best
+built-in schedule determined in \citet{b1} for loop 1:
+\texttt{dynamic, 16}.
+Figure~\ref{subfig:time_loop2} shows the same for the
+second loop.
+
+Both best built-in versions come from a preselection of
+schedules tested on the two loops of the scientific
+program.
+The two best schedules, \texttt{dynamic, 16} for the first
+and \texttt{dynamic, 8} for the second loop, were selected
+based on their performance when run with 4 threads.
+\citet{b1} argues, that, especially for the second loop,
+a \texttt{dynamic} schedule with a smaller chunk size,
+would scale better.
+
+One can see in Figure~\ref{subfig:time_loop1} that the
+\texttt{naive} affinity schedule performs better than the
+\texttt{queue} version.
+For both loops, the \texttt{queue} affinity schedule
+performs as good as the \texttt{naive} affinity schedule
+for the most parts, except for the tests with 16 OpenMP
+threads, where the performance of the \texttt{queue}
+affinity schedule very much deteriorates, resulting in
+timings worse than using it with 8 threads.
+The \texttt{naive} affinity schedule on the other hand
+has no such scaling problems.
+It produces a monotonic increasing function over the
+different amounts of threads tested.
+
+When the results of the affinity schedules are compared to
+the best built-in schedules for both loops, they behave
+exactly the opposite for both loops.
+For the first loop, the two affinity schedule versions are
+faster than the built-in schedule for lower amounts of
+threads (1, 2, 4, 6).
+With 8, 12 and 16 threads \texttt{dynamic, 16} performs
+better than the affinity schedules.
+For the second loop, this behavior changes.
+\texttt{dynamic, 8} performs better with 1, 2, 4 and 6
+threads, while the affinity schedules outperform it with
+8, 12 and 16 threads.
+
 \begin{figure} % speedup {{{
 
 \begin{subfigure}{\linewidth} % {{{
@@ -696,13 +776,88 @@ determined by the benchmark from \citet{b1}.
 \label{fig:speedup}
 \end{figure} % }}}
 
+Figure~\ref{fig:time} shows the performance of the
+schedules, Figure~\ref{fig:speedup} shows their scaling
+capabilities by displaying the speedup of each schedule
+when using more threads.
+Figure~\ref{subfig:speedup_loop1} shows that the affinity
+schedules do not scale as well as \texttt{dynamic, 16} for
+the first loop.
+Again the deterioration of the \texttt{queue} affinity
+schedule for 16 threads is shown.
+
+During execution of the second loop,
+Figure~\ref{subfig:speedup_loop2} shows that the affinity
+schedules do not scale even close to optimal speedup for
+2, 4 and 6 threads.
+Their scaling increases rather rapidly from 4 to 12 threads
+while decreasing again for 16 threads.
+\texttt{dynamic, 8} scales close to optimal until 4 threads
+and hits a plateau afterwards, which is the reason why
+the affinity schedules outperform the built-in schedule
+for more threads.
+
 % }}}
 
 \section{Discussion} % {{{
 
+While the \texttt{queue} version of the affinity schedule
+has the theoretical better sequential performance than the
+\texttt{naive} affinity schedule, the fact that it is not
+thread-safe and therefore must be made thread-safe by
+mutual exclusion, clearly makes the priority queue a
+bottleneck.
+The synchronization really hurts the \texttt{queue}
+affinity schedule, making its performance drop with higher
+amounts of threads, wherefore the \texttt{naive} affinity
+schedule outperforms it.
+
+While for the first loop the performance difference between
+the built-in schedule and both versions of the affinity
+schedule is minimal, the affinity schedules---especially
+the \texttt{naive} affinity schedule---out-perform the
+\texttt{dynamic, 8} for the second loop with higher
+threads.
+This paper therefore underlines the claim made in
+\citep{b1}, that a \texttt{dynamic} schedule with a lower
+chunk size than 8 would scale better for the second loop,
+because the tested affinity schedules provide a lower
+chunk size for the most parts.
+
+Overall the usefulness of the affinity schedule is
+questionable, because more inner state must be maintained
+(the shared splits instead of just the loop) and more
+synchronization must be performed---once a thread has
+finished its split---than during a truly \texttt{dynamic}
+schedule.
+
 % }}}
 
 \section{Conclusion} % {{{
+
+The affinity schedule's performance is comparable to the
+built-in schedules tested in \citet{b1}, sometimes even
+outperforming them.
+But overall, the affinity schedule suffers from its
+complexity and the necessarily accompanying
+synchronization, because it tries to add the properties
+of several built-in schedules into one schedule (see
+Chapter~\ref{sec:method}).
+
+If one were to continue looking into a better performing
+affinity schedule, a good place to start would probably be
+to build the \texttt{queue} affinity schedule on top of a
+thread-safe priority queue.
+This could remove its bottleneck and make it scale in a
+nice way, because its overhead would be compensated by
+a bigger amount of threads, where probably the
+\texttt{naive} affinity schedule would suffer performance
+drops.
+% too complex, but still performs comparably to built-in
+% schedules
+%
+% thread-safe version of the queue should be tried (maybe
+% making performance better)
 
 % }}}
 
